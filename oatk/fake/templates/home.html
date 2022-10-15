@@ -1,0 +1,21 @@
+{% if user %}
+  <style>pre{white-space:wrap}</style>
+<div>Logged in as <strong>{{user}}</strong></div>
+
+{% for client in clients %}
+<pre>
+{{ client|tojson(2) }}
+
+</pre>
+<hr>
+{% endfor %}
+
+<br><a href="/oauth/create-client">Create Client</a>
+| <a href="/oauth/logout">Log out</a>
+
+{% else %}
+<form action="" method="post">
+  <input type="text" name="username" placeholder="username">
+  <button type="submit">Login / Signup</button>
+</form>
+{% endif %}

@@ -1,3 +1,23 @@
+keys: public_key.pem
+
+public_key.pem: private_key.pem
+	openssl rsa -in $< -outform PEM -pubout -out $@
+
+private_key.pem:
+	openssl genrsa -out $@ 2048
+
+server: keys
+	python -m oatk with_private private_key.pem with_jwks certs.json server run
+
+app:
+	gunicorn -b 0.0.0.0:5001 -k eventlet -w 1 examples.client.app:server
+
+api:
+	gunicorn -b 0.0.0.0:5002 -k eventlet -w 1 examples.web:app
+
+
+# project management targets below this point...
+
 tag:
 	git tag ${TAG} -m "${MSG}"
 	git push --tags

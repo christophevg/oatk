@@ -1,0 +1,20 @@
+<div id="app" style="display:none;">
+  <a style="float:right" id="logout" href="#">logout</a>
+  <h1>My App</h1>
+  <div id="output"></div>  
+</div>
+
+<script src="static/jquery-3.6.1.min.js"></script>
+<script src="http://localhost:5000/static/oatk.js"></script>
+<script>
+  oatk.with_authenticated_user(function(user, http, logout) {
+    console.log("👩 user is authenticated...", user);
+    $("#app").show();            // time to show the application
+    $("#logout").click(logout);  // wire the logout action
+
+    // call our API to say hello
+    http.getJSON("http://localhost:5002/api/hello", function(result) {
+      $("#output").text(JSON.stringify(result));
+    });
+  });
+</script>

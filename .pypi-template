@@ -20,6 +20,9 @@ requires:
 - cryptography
 - python-dotenv
 - fire
+- flask
+- flask_cors
+- flask_restful
 scripts: []
 your_author_name: Christophe VG
 your_email_address: contact@christophe.vg
