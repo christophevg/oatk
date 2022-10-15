@@ -26,11 +26,13 @@ INSTALL_REQUIRES = [
   "flask",
   "flask_cors",
   "flask_restful",
-  "pymongo"
+  "pymongo",
+  
 ]
 ENTRY_POINTS = {
   "console_scripts" : [
-    "oatk=oatk.__main__:cli"
+    "oatk=oatk.__main__:cli",
+    
   ]
 }
 SCRIPTS = [

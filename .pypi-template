@@ -5,7 +5,7 @@ classifiers:
 - 'Programming Language :: Python :: 3.8'
 - 'Development Status :: 4 - Beta'
 console_scripts:
-- oatk=oath.__main__:cli
+- oatk=oatk.__main__:cli
 first_year_of_publication: '2022'
 github_account: christophevg
 github_repo_name: oatk
@@ -20,9 +20,11 @@ requires:
 - cryptography
 - python-dotenv
 - fire
+- authlib
 - flask
 - flask_cors
 - flask_restful
+- pymongo
 scripts: []
 your_author_name: Christophe VG
 your_email_address: contact@christophe.vg
@@ -38,3 +40,5 @@ skip:
 - requirements.txt
 - tests
 - tox.ini
+- Makefile
+- MANIFEST.in
