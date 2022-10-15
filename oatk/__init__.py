@@ -32,7 +32,7 @@ class OAuthToolkit():
     self._public_key  = None
     self._alg         = "RS256"
     self._kid         = str(uuid.uuid4())
-    self._claims      = None
+    self._claims      = {}
     
     self.server       = fake.server
     self.server.oatk  = self
@@ -110,10 +110,12 @@ class OAuthToolkit():
 
   @property
   def token(self):
-    return jwt.encode(
-      self._claims, self._private_key, algorithm=self._alg,
-      headers={ "kid": self._kid, "alg" : self._alg }
-    )
+    if self._private_key:
+      return jwt.encode(
+        self._claims, self._private_key, algorithm=self._alg,
+        headers={ "kid": self._kid, "alg" : self._alg }
+      )
+    return None
 
   def validate(self, token=None):
     kid = self.header(token)["kid"]
