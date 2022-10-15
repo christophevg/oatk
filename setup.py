@@ -26,8 +26,7 @@ INSTALL_REQUIRES = [
 ]
 ENTRY_POINTS = {
   "console_scripts" : [
-    "oatk=oath.__main__:cli",
-    
+    "oatk=oatk.__main__:cli"
   ]
 }
 SCRIPTS = [
