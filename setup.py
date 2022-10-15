@@ -22,7 +22,11 @@ INSTALL_REQUIRES = [
   "cryptography",
   "python-dotenv",
   "fire",
-  
+  "authlib",
+  "flask",
+  "flask_cors",
+  "flask_restful",
+  "pymongo"
 ]
 ENTRY_POINTS = {
   "console_scripts" : [
