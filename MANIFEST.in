@@ -1,3 +1,5 @@
 include .github/README.md
 global-exclude __pycache__
 global-exclude *.py[co]
+recursive-include oatk/fake/static *
+recursive-include oatk/fake/templates *
