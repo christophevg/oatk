@@ -22,7 +22,7 @@ Minimal survival command...
 Federated login using OAuth/OpenIDConnect/... is a de facto standard for authenticating and authorizing users nowadays. You simply don't want to deal with them in your application at all. The underlying principle is simple: have someone you trust tell you that you can trust a user and get your own personal token that proves you're operating for that user when accessing other resources, who can validate this token with the trusted authenticating party.
 
 <p align="center">
-  <img alt="Oauth Flow Conceptually" src="media/oauth-flow-conceptually.png" width="400">
+  <img alt="Oauth Flow Conceptually" src="../media/oauth-flow-conceptually.png" width="400">
 </p>
 
 This OAuthTooKit brings together very basic implementations of several aspects of this flow, aiming to have this up and running quickly in a development context, without the hassle of setting up a full-fletched OAuth server or having to go through many hoops in configuring an existing service to accept your application and users.
@@ -280,7 +280,7 @@ These service routes enable the following OAuth workflow between your applicatio
 
 Visually:
 
-![Oauth Flow Visually](media/oauth-flow-visually.png)
+![Oauth Flow Visually](../media/oauth-flow-visually.png)
 
 ### Bringing everything together...
 
@@ -325,25 +325,25 @@ Three servers are up and running now:
 We first visit the fake OAuth server to setup a user and a client registration:
 
 <p align="center">
-  <img alt="Step 1: Login/Signup" src="media/step1.png" width="800">
+  <img alt="Step 1: Login/Signup" src="../media/step1.png" width="800">
 </p>
 
 Let's login/signup as `xtof`:
 
 <p align="center">
-  <img alt="Step 2: Logged in" src="media/step2.png" width="800">
+  <img alt="Step 2: Logged in" src="../media/step2.png" width="800">
 </p>
 
 Now, create a client registration...
 
 <p align="center">
-  <img alt="Step 3: Create Client Registration" src="media/step3.png" width="800">
+  <img alt="Step 3: Create Client Registration" src="../media/step3.png" width="800">
 </p>
 
 The defaults are all set for this demo, so just submit them...
 
 <p align="center">
-  <img alt="Step 4: All set" src="media/step4.png" width="800">
+  <img alt="Step 4: All set" src="../media/step4.png" width="800">
 </p>
 
 So we now have an OAuth server, with a user `xtof` and a client registration for an application known by the clientId `test`.
@@ -378,19 +378,19 @@ Our web application is very simple: it requires and authenticated user and once 
 Let's visit it...
 
 <p align="center">
-  <img alt="Step 5: Login/Signup" src="media/step5.png" width="800">
+  <img alt="Step 5: Login/Signup" src="../media/step5.png" width="800">
 </p>
 
 Did we go to the wrong server? No, our application redirected us to the (fake) OAuth server, based on its known configuration. It could get the URLs, but didn't have an authorization code, so it redirected to the authorization endpoint. And since we're not logged in, because we logged out earlier, we now have to log in again, as `xtof`.
 
 <p align="center">
-  <img alt="Step 6: Give consent" src="media/step6.png" width="800">
+  <img alt="Step 6: Give consent" src="../media/step6.png" width="800">
 </p>
 
 We explicitly have to give consent for the application to use our information and act on our behalf. After that, we are again redirected to our application that now continues the OAuth flow...
 
 <p align="center">
-  <img alt="Step 7: Hello" src="media/step7.png" width="800">
+  <img alt="Step 7: Hello" src="../media/step7.png" width="800">
 </p>
 
 ... and calls our API that requires authentication and authorization using our OAuth token.
