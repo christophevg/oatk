@@ -32,15 +32,13 @@ def home():
 
   # GET
   user = current_user()
-  logger.info(user)
   if user:
     clients = list(db["clients"].find({"user_id" : user["_id"]}))
+    for client in clients:
+      client["_id"] = str(client["_id"]) # turn Mongo ObjectID into string
+    return render_template("home.html", user=user, clients=clients)
   else:
-    clients = []
-  for client in clients:
-    client["_id"] = str(client["_id"]) # turn Mongo ObjectID into string
-  return render_template("home.html", user=user, clients=clients)
-
+    return render_template("login.html")
 
 @server.route("/oauth/create-client", methods=["GET", "POST"])
 def create_client():
@@ -116,7 +114,7 @@ def authorize():
     nonce = request.args["nonce"]
     logger.info(f"got client: {client}")
   else:
-    return render_template("login-before-consent.html", args=str(request.query_string.decode()))
+    return render_template("login.html", args=str(request.query_string.decode()))
 
   if "confirm" in request.form:
     logger.info("got confirmation: f{request.form['confirm']}")
@@ -145,7 +143,7 @@ def authorize():
   except Exception as error:
     logger.exception(error)
     return jsonify({"error" : str(error)})
-  return render_template("authorize.html", user=user, grant=grant)
+  return render_template("authorize.html", grant=grant)
 
 @server.route("/oauth/token", methods=["POST"])
 def issue_token():
@@ -219,7 +217,7 @@ def well_known():
 
 @server.route("/oauth/logout")
 def logout():
-  session.pop("id")
+  session.pop("id", None)
   goto = "/"
   return redirect(goto, 302)
 
