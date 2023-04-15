@@ -11,8 +11,8 @@
 <script src="static/jquery-3.6.1.min.js"></script>
 <script src="static/oatk.js"></script>
 <script>
-  oatk.using_provider("https://accounts.google.com/.well-known/openid-configuration");
-  oatk.using_client_id("376832907400-2vr6257d6ds9l2jk5a45totnicvgqfm5.apps.googleusercontent.com");
+  oatk.using_provider("{{ OAUTH_PROVIDER }}");
+  oatk.using_client_id("{{ OAUTH_CLIENT_ID }}");
   oatk.apply_flow("implicit");
   
   function show_landing() {

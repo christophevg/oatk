@@ -16,7 +16,7 @@ server = Flask(__name__)
 # route to load web app
 @server.route("/", methods=["GET"])
 def home():
-  return render_template("home.html")
+  return render_template("home.html", **os.environ)
 
 # API set up
 api = Api(server)
