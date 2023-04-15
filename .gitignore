@@ -13,3 +13,4 @@ local
 .DS_Store
 certs.json
 token.txt
+*.local

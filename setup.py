@@ -27,7 +27,7 @@ INSTALL_REQUIRES = [
   "flask_cors",
   "flask_restful",
   "pymongo",
-  
+  "requests"
 ]
 ENTRY_POINTS = {
   "console_scripts" : [

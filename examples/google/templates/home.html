@@ -1,0 +1,51 @@
+<div id="landing">
+  <a id="login" href="#">login with google</a>
+</div>
+
+<div id="app" style="display:none;">
+  <a style="float:right" id="logout" href="#">logout</a>
+  <h1>My App</h1>
+  <div id="output"></div>  
+</div>
+
+<script src="static/jquery-3.6.1.min.js"></script>
+<script src="static/oatk.js"></script>
+<script>
+  oatk.using_provider("https://accounts.google.com/.well-known/openid-configuration");
+  oatk.using_client_id("376832907400-2vr6257d6ds9l2jk5a45totnicvgqfm5.apps.googleusercontent.com");
+  oatk.apply_flow("implicit");
+  
+  function show_landing() {
+    $("#app").hide();
+    $("#landing").show();    
+  }
+  
+  function show_app() {
+    $("#app").show();
+    $("#landing").hide();
+  }
+
+  function login() {
+    oatk.with_authenticated_user(function(user, http, logout) {
+      console.log("👩 user is authenticated...", user);
+      $("#logout").click(function() { logout(show_landing); });
+      show_app();
+      
+      // call our API to say hello
+      http.getJSON("http://localhost:8000/api/hello", function(result) {
+        $("#output").text(JSON.stringify(result));
+      }, function(result) {
+        if(result.status == 403) {
+          $("#output").text("You were authenticated by Google, yet you don't have the correct claims.");
+        }
+      });
+    });
+  }
+
+  $("#login").click(login);
+  
+  if(oatk.have_authenticated_user()) {
+    login();
+  }
+  
+</script>

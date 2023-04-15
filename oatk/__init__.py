@@ -3,6 +3,16 @@ __version__ = "0.0.5"
 import logging
 logger = logging.getLogger(__name__)
 
+import os
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL") or "INFO"
+FORMAT    = "[%(name)s] [%(levelname)s] %(message)s"
+DATEFMT   = "%Y-%m-%d %H:%M:%S %z"
+
+logging.basicConfig(level=LOG_LEVEL, format=FORMAT, datefmt=DATEFMT)
+formatter = logging.Formatter(FORMAT, DATEFMT)
+logging.getLogger().handlers[0].setFormatter(formatter)
+
 import json
 import uuid
 
@@ -14,6 +24,8 @@ from cryptography.hazmat.primitives import serialization
 
 from functools import wraps
 from flask import request, Response
+
+import requests
 
 from oatk import fake
 
@@ -33,6 +45,7 @@ class OAuthToolkit():
     self._alg         = "RS256"
     self._kid         = str(uuid.uuid4())
     self._claims      = {}
+    self._client_id   = None
     
     self.server       = fake.server
     self.server.oatk  = self
@@ -57,6 +70,24 @@ class OAuthToolkit():
         backend=default_backend()
       )
     self._certs = { self._kid : self._public_key }
+    return self
+
+  def using_provider(self, provider_url):
+    try:
+      config = json.loads(requests.get(provider_url).content)
+    except:
+      logger.exception("could not retrieve openid configuration")
+      return
+    try:
+      self.with_jwks(requests.get(config["jwks_uri"]).content)
+    except:
+      logger.exception("could not import jwks")
+      return
+    logger.info(f"succesfully configured from {provider_url}")
+    return self
+
+  def with_client_id(self, client_id):
+    self._client_id = client_id
     return self
 
   @property
@@ -122,7 +153,7 @@ class OAuthToolkit():
     alg = self.header(token)["alg"]
     if not token:
       token = self._encoded
-    jwt.decode( token, self._certs[kid], algorithms=[alg] )
+    jwt.decode( token, self._certs[kid], algorithms=[alg], audience=self._client_id )
 
   def decode(self, token=None):
     if not token:
@@ -156,13 +187,20 @@ class OAuthToolkit():
           for claim, value in required_claims.items():
             if not claim in claims:
               raise ValueError(f"required claim {claim} is missing")
-            if not value in claims[claim]:
-              raise ValueError(f"claim {claim} is missing required value")
+            if callable(value):
+              if not value(claims[claim]):
+                raise ValueError(f"claim {claim} doesn't match required criteria")
+            elif type(value) == list:
+              if not value in claims[claim]:
+                raise ValueError(f"claim {claim} is missing required value")
+            elif value != claims[claim]:
+              raise ValueError(f"claim {claim} doesn't equal required value")
           return f(*args, **kwargs)
         except KeyError as ex:
           msg = "Missing Authorization"
-        except Exception as e:
-          msg = repr(e)
-        return Response(msg, 401)
+          return Response(msg, 401)
+        except ValueError as e:
+          msg = str(e)
+        return Response(msg, 403)
       return wrapper
     return decorator

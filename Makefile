@@ -16,6 +16,8 @@ app:
 api:
 	gunicorn -b 0.0.0.0:5002 -k eventlet -w 1 examples.web:app
 
+google:
+	gunicorn -k eventlet -w 1 examples.google.app:server	
 
 # project management targets below this point...
 
