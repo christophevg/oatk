@@ -70,7 +70,7 @@
         args[parts[0]] = parts[1];
       }
     );
-    console.log("args", args);
+    // console.log("args", args);
     if(args["id_token"]) {
       new_token = args["id_token"];
       // clear hash
@@ -196,7 +196,7 @@
       "&scope=openid profile email" +
       "&redirect_uri=" + window.location.href.split("?")[0].split("#")[0].replace(/\/$/, "")
     console.log("➡️ getting implicit_token...");
-    console.log(u);
+    // console.log(u);
     window.location.href = u;
   }
 
