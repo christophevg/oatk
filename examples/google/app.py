@@ -4,7 +4,23 @@ from pathlib import Path
 load_dotenv(find_dotenv())
 load_dotenv(find_dotenv(".env.local"))
 
+import logging
+logger = logging.getLogger(__name__)
+
 import os
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL") or "INFO"
+
+# setup logging infrastructure
+
+logging.getLogger("urllib3").setLevel(logging.WARN)
+
+FORMAT  = "[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"
+DATEFMT = "%Y-%m-%d %H:%M:%S %z"
+
+logging.basicConfig(level=LOG_LEVEL, format=FORMAT, datefmt=DATEFMT)
+formatter = logging.Formatter(FORMAT, DATEFMT)
+logging.getLogger().handlers[0].setFormatter(formatter)
 
 from flask import Flask, render_template, Response
 from flask_restful import Resource, Api
