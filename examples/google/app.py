@@ -35,7 +35,7 @@ server = Flask(__name__)
 def home():
   return render_template("home.html", **os.environ)
 
-# route service oatk.js from the oatk package
+# route for oatk.js from the oatk package
 @server.route("/oatk.js", methods=["GET"])
 def oatk_script():
   return Response(oatk.js.as_src(), mimetype="application/javascript")

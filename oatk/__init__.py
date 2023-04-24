@@ -191,6 +191,8 @@ class OAuthToolkit():
           return Response(msg, 401)
         except ValueError as e:
           msg = str(e)
+        except Exception as e:
+          msg = str(e)
         return Response(msg, 403)
       return wrapper
     return decorator

@@ -70,7 +70,7 @@
         args[parts[0]] = parts[1];
       }
     );
-    // console.log("args", args);
+    console.log("args", args);
     if(args["id_token"]) {
       new_token = args["id_token"];
       // clear hash
@@ -186,7 +186,7 @@
   }
 
   function get_implicit_token() {
-    // goto auth point, in the end we're redirected here with a ?access_token=... arg
+    // goto auth point, in the end we're redirected here with a ?access_token=...&...&id_token=... arg
     var u = urls["authorization_endpoint"] +
       "?client_id=" + client_id +
       "&response_type=token%20id_token" +
