@@ -194,9 +194,9 @@
       "&state=" + state +
       "&include_granted_scopes=true" +
       "&scope=openid profile email" +
-      "&redirect_uri=" + window.location.href.split("?")[0];
+      "&redirect_uri=" + window.location.href.split("?")[0].split("#")[0].replace(/\/$/, "")
     console.log("➡️ getting implicit_token...");
-    // console.log(u);
+    console.log(u);
     window.location.href = u;
   }
 
