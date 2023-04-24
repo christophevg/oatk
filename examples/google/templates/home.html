@@ -32,7 +32,8 @@
       show_app();
       
       // call our API to say hello
-      http.getJSON("http://localhost:8000/api/hello", function(result) {
+      var base_url = window.location.href.split("?")[0].split("#")[0].replace(/\/$/, "");
+      http.getJSON(base_url + "/api/hello", function(result) {
         $("#output").text(JSON.stringify(result));
       }, function(result) {
         if(result.status == 403) {
