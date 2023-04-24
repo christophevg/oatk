@@ -4,9 +4,6 @@
 
 [![Latest Version on PyPI](https://img.shields.io/pypi/v/oatk.svg)](https://pypi.python.org/pypi/oatk/)
 [![Supported Implementations](https://img.shields.io/pypi/pyversions/oatk.svg)](https://pypi.python.org/pypi/oatk/)
-[![Build Status](https://secure.travis-ci.org/christophevg/oatk.svg?branch=master)](http://travis-ci.org/christophevg/oatk)
-[![Documentation Status](https://readthedocs.org/projects/oatk/badge/?version=latest)](https://oatk.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/christophevg/oatk/badge.svg?branch=master)](https://coveralls.io/github/christophevg/oatk?branch=master)
 [![Built with PyPi Template](https://img.shields.io/badge/PyPi_Template-v0.2.0-blue.svg)](https://github.com/christophevg/pypi-template)
 
 ## Installation
