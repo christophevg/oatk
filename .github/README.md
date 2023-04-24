@@ -394,3 +394,121 @@ We explicitly have to give consent for the application to use our information an
 
 > I've checked the console log preservation flag, to see the entire flow more clearly as it happens behind the scenes. You can see that upon returning to our app we now do have an authorization code, start another call to the server to exchange the code for a token, which results in a full set of URLs, code and token, so we can call our API and display the result.
 
+## Google
+
+The `examples/` folder contains another example, which is targetting Google as an authentication provider. The implicit flow is a little different, providing an access token (called `id_token`) immediately after logon and consent. The `id_token` kan be used as a JWT access token, yet it cannot be refreshed from the javascript client side.
+
+> So for now, I use it to authenticate the user once and set up an application-level session.
+
+The `examples/google/templates/home.html` file shows the minimal client-side HTML/javascript implementation:
+
+```html
+<div id="landing">
+  <a id="login" href="#">login with google</a>
+</div>
+
+<div id="app" style="display:none;">
+  <a style="float:right" id="logout" href="#">logout</a>
+  <h1>My App</h1>
+  <div id="output"></div>  
+</div>
+
+<script src="/static/jquery-3.6.1.min.js"></script>
+<script src="/oatk.js"></script>
+<script>
+  oatk.using_provider("{{ OAUTH_PROVIDER }}");
+  oatk.using_client_id("{{ OAUTH_CLIENT_ID }}");
+  oatk.apply_flow("implicit");
+  
+  function show_landing() {
+    $("#app").hide();
+    $("#landing").show();    
+  }
+  
+  function show_app() {
+    $("#app").show();
+    $("#landing").hide();
+  }
+
+  function login() {
+    oatk.with_authenticated_user(function(user, http, logout) {
+      console.log("👩 user is authenticated...", user);
+      $("#logout").click(function() { logout(show_landing); });
+      show_app();
+      
+      // call our API to say hello
+      http.getJSON("http://localhost:8000/api/hello", function(result) {
+        $("#output").text(JSON.stringify(result));
+      }, function(result) {
+        if(result.status == 403) {
+          console.log(result);
+          $("#output").text("You were authenticated by Google, yet you don't have the correct claims.");
+        }
+      });
+    });
+  }
+
+  $("#login").click(login);
+  
+  if(oatk.have_authenticated_user()) {
+    login();
+  }
+</script>
+```
+
+At the server-side of our application we need to:
+
+- serve oatk.js from the package (e.g. using Flask)
+- protect our endpoints with authorisation logic (e.g. using Flask_restful)
+
+```python
+from flask import Flask, render_template, Response
+from flask_restful import Resource, Api
+
+import oatk.js
+from oatk import OAuthToolkit
+
+server = Flask(__name__)
+
+# route to load web app
+@server.route("/", methods=["GET"])
+def home():
+  return render_template("home.html", **os.environ)
+
+# route for oatk.js from the oatk package
+@server.route("/oatk.js", methods=["GET"])
+def oatk_script():
+  return Response(oatk.js.as_src(), mimetype="application/javascript")
+
+# API set up
+api = Api(server)
+
+# setup oatk
+auth = OAuthToolkit()
+auth.using_provider(os.environ["OAUTH_PROVIDER"]);
+auth.with_client_id(os.environ["OAUTH_CLIENT_ID"])
+
+def validate_name(name):
+  return name == "Christophe VG"
+
+class HelloWorld(Resource):
+  @auth.authenticated_with_claims(name=validate_name)
+  def get(self):
+    return {"hello": "world"}
+
+api.add_resource(HelloWorld, "/api/hello")
+```
+
+If you [register an application with Google](https://console.cloud.google.com/apis/dashboard) and add `localhost:8000` as a authorized Javascript source and redirect URL for the credentials, you can run the example using `gunicorn -k eventlet -w 1 examples.google.app:server`, which triggers the following flow:
+
+<p align="center">
+  <img alt="Step 1: request login" src="https://raw.githubusercontent.com/christophevg/oatk/master/media/google-step1.png" width="800">
+</p>
+
+<p align="center">
+  <img alt="Step 2: authenticate and give consent (implicitly)" src="https://raw.githubusercontent.com/christophevg/oatk/master/media/google-step2.png" width="800">
+</p>
+
+<p align="center">
+  <img alt="Step 3: show protected content" src="https://raw.githubusercontent.com/christophevg/oatk/master/media/google-step3.png" width="800">
+</p>
