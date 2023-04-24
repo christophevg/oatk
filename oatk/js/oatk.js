@@ -262,7 +262,8 @@
     },
     callback = null;
 
-  // exposed function
+  // exposed functions
+
   var with_authenticated_user = function with_authenicated_user(on_success) {
     callback = on_success;
     flow(); // start flow
@@ -317,12 +318,11 @@
       }
     }
     console.log("✅ access token");
-    if (!callback) {
-      return alert("no callback?!");
-    }
 
     // we've got everyting...
-    callback(user_info_from_token(), http, logout);
+    if(callback) {
+      callback(user_info_from_token(), http, logout);
+    }
   }
 
   globals.oatk = {
@@ -330,7 +330,11 @@
     "using_client_id":         using_client_id,
     "apply_flow":              apply_flow,
     "with_authenticated_user": with_authenticated_user,
-    "have_authenticated_user": have_authenticated_user
+    "have_authenticated_user": have_authenticated_user,
+    "get_user_info":           user_info_from_token,
+    "http":                    http,
+    "login":                   flow,
+    "logout":                  logout
   };
 
 
