@@ -234,10 +234,23 @@
   // and results in a user object and an http module with functions to get, 
   // post, put and delete remote resources, adding the required authentication.
   var http = {
-      "getJSON": function(url, on_success, on_error) {
+      getJSON: function(url, on_success, on_error) {
         $.ajax({
           type: "GET",
           url: url,
+          headers: {
+            "Authorization": "Bearer " + token
+          },
+          success: on_success,
+          error: on_error,
+          dataType: "json"
+        });
+      },
+      postJSON: function(url, data, on_success, on_error) {
+        $.ajax({
+          type: "POST",
+          url: url,
+          data : data,
           headers: {
             "Authorization": "Bearer " + token
           },
