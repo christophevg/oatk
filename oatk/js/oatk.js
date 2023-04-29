@@ -16,6 +16,7 @@
 
   function clear(name) {
     save(name, null);
+    return null;
   }
 
   function randomString(length) {
@@ -248,8 +249,8 @@
     },
     logout = function(after_logout) {
       // clear locals
-      clear("oauth_code");
-      clear("oauth_token");
+      code  = clear("oauth_code");
+      token = clear("oauth_token");
       if(urls["end_session_endpoint"]) {
         // goto logout endpoint
         window.location.href = urls["end_session_endpoint"] +
