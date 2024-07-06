@@ -33,7 +33,11 @@ server = Flask(__name__)
 # route to load web app
 @server.route("/", methods=["GET"])
 def home():
-  return render_template("home.html", **os.environ)
+  return render_template(
+    "home.html",
+    OAUTH_PROVIDER=os.environ["OAUTH_PROVIDER"],
+    OAUTH_CLIENT_ID=os.environ["OAUTH_CLIENT_ID"]
+  )
 
 # route for oatk.js from the oatk package
 @server.route("/oatk.js", methods=["GET"])
