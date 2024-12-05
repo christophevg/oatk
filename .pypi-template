@@ -15,6 +15,7 @@ package_module_name: oatk
 package_name: oatk
 package_tagline: A collection of useful functions for dealing with OAuth
 package_title: OAuthToolKit
+readme: .github/README.md
 requires:
 - pyjwt
 - cryptography
@@ -27,19 +28,19 @@ requires:
 - pymongo
 - requests
 scripts: []
+skip:
+- (package_module_name)
+- docs
+- .readthedocs.yaml
+- requirements.docs.txt
+- .github/README.md
+- .gitignore
+- tests
+- tox.ini
+- MANIFEST.in
+- .github/workflows
+version: 0.8.0
 your_author_name: Christophe VG
 your_email_address: contact@christophe.vg
 your_full_name: Christophe VG
 your_name: Christophe VG
-skip:
-- (package_module_name)
-- docs
-- docs/_static
-- .github/README.md
-- .travis.yml
-- .gitignore
-- requirements.txt
-- tests
-- tox.ini
-- Makefile
-- MANIFEST.in
