@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import logging
 logger = logging.getLogger(__name__)
@@ -185,7 +185,7 @@ class OAuthToolkit():
   def authenticated(self, f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-      return self.execute_authenticated(f, *args, **kwargs)
+      return self.execute_authenticated(f, None, *args, **kwargs)
     return wrapper
 
   def authenticated_with_claims(self, **required_claims):
