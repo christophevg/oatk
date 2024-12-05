@@ -1,4 +1,4 @@
-__version__ = "0.0.11"
+__version__ = "0.1.0"
 
 import logging
 logger = logging.getLogger(__name__)
@@ -150,49 +150,48 @@ class OAuthToolkit():
       token = self._encoded
     return jwt.decode( token, options={"verify_signature": False} )
 
+  def execute_authenticated(self, f, required_claims=None, *args, **kwargs):
+    code = 403
+    msg  = ""
+    try:
+      token = request.headers["Authorization"][7:]
+      self.validate(token)
+      if required_claims:
+        claims = self.decode(token)
+        for claim, value in required_claims.items():
+          if not claim in claims:
+            raise ValueError(f"required claim {claim} is missing")
+          if callable(value):
+            if not value(claims[claim]):
+              raise ValueError(f"claim {claim} doesn't match required criteria")
+          elif type(value) == list:
+            if not value in claims[claim]:
+              raise ValueError(f"claim {claim} is missing required value")
+          elif value != claims[claim]:
+            raise ValueError(f"claim {claim} doesn't equal required value")
+      # authenticated -> execute
+      return f(*args, **kwargs)
+    except KeyError as ex:
+      msg = "Missing Authorization"
+      code = 401
+    except ValueError as e:
+      msg = str(e)
+      logger.warning(msg)
+    except Exception as e:
+      msg = repr(e)
+      logger.warning(f"unexpected exception: {msg}")
+    return Response(msg, code)
+
   def authenticated(self, f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-      msg = ""
-      try:
-        token = request.headers["Authorization"][7:]
-        self.validate(token)
-        return f(*args, **kwargs)
-      except KeyError as ex:
-        msg = "Missing Authorization"
-      except Exception as e:
-        msg = repr(e)
-      return Response(msg, 401)
+      return self.execute_authenticated(f, *args, **kwargs)
     return wrapper
 
   def authenticated_with_claims(self, **required_claims):
     def decorator(f):
       @wraps(f)
       def wrapper(*args, **kwargs):
-        msg = ""
-        try:
-          token = request.headers["Authorization"][7:]
-          self.validate(token)
-          claims = self.decode(token)
-          for claim, value in required_claims.items():
-            if not claim in claims:
-              raise ValueError(f"required claim {claim} is missing")
-            if callable(value):
-              if not value(claims[claim]):
-                raise ValueError(f"claim {claim} doesn't match required criteria")
-            elif type(value) == list:
-              if not value in claims[claim]:
-                raise ValueError(f"claim {claim} is missing required value")
-            elif value != claims[claim]:
-              raise ValueError(f"claim {claim} doesn't equal required value")
-          return f(*args, **kwargs)
-        except KeyError as ex:
-          msg = "Missing Authorization"
-          return Response(msg, 401)
-        except ValueError as e:
-          msg = str(e)
-        except Exception as e:
-          msg = str(e)
-        return Response(msg, 403)
+        return self.execute_authenticated(f, required_claims, *args, **kwargs)
       return wrapper
     return decorator
