@@ -159,14 +159,14 @@
     // goto auth point, in the end we're redirected here with a ?code=... arg
     window.location.href = urls["authorization_endpoint"] +
       "?client_id=" + client_id +
-      "&redirect_uri=" + window.location +
+      "&redirect_uri=" + window.location.href +
       "&response_type=code" +
       "&response_mode=fragment" +
       "&scope=openid profile" +
       "&state=" + state +
       "&nonce=" + nonce +
       "&code_challenge=" + code_challenge,
-      "&code_challenge_method=S256"
+      "&code_challenge_method=S256";
   }
 
   // TOKEN
@@ -198,12 +198,12 @@
     // goto auth point, in the end we're redirected here with a ?access_token=...&...&id_token=... arg
     var u = urls["authorization_endpoint"] +
       "?client_id=" + client_id +
-      "&response_type=token%20id_token" +
+      "&response_type=" + encodeURIComponent("token id_token") +
       "&nonce=" + nonce +
       "&state=" + state +
       "&include_granted_scopes=true" +
-      "&scope=openid%20profile%20email" +
-      "&redirect_uri=" + window.location.href.split("?")[0].split("#")[0].replace(/\/$/, "")
+      "&scope=" + encodeURIComponent("openid profile email") +
+      "&redirect_uri=" + encodeURIComponent(window.location.href.split("?")[0].split("#")[0].replace(/\/$/, ""))
     console.log("➡️ getting implicit_token...");
     setTimeout(function() {
       console.warn("Redirecting to authorisation endpoint failed 🥺");
@@ -211,7 +211,7 @@
       reset();
       console.warn("All local information is cleared, try refreshing the page to restart.");
     }, 5000);
-    window.location.href = u;
+    window.location.href = new URL(u).href;
   }
 
   function parseJwt(token) {
@@ -281,7 +281,7 @@
         // goto logout endpoint
         window.location.href = urls["end_session_endpoint"] +
           "?client_id=" + client_id +
-          "&redirect_uri=" + window.location;
+          "&redirect_uri=" + window.location.href;
       }
       if(after_logout) {
         after_logout();
