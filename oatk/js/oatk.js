@@ -18,6 +18,14 @@
     save(name, null);
     return null;
   }
+  
+  function reset() {
+    clear("oauth_url");
+    clear("oauth_code");
+    clear("oauth_token");
+    clear("oauth_code_challenge");
+    clear("oauth_code_verifier");
+  }
 
   function randomString(length) {
     var text = "";
@@ -197,7 +205,12 @@
       "&scope=openid%20profile%20email" +
       "&redirect_uri=" + window.location.href.split("?")[0].split("#")[0].replace(/\/$/, "")
     console.log("➡️ getting implicit_token...");
-    // console.log(u);
+    setTimeout(function() {
+      console.warn("Redirecting to authorisation endpoint failed 🥺");
+      console.warn(u);
+      reset();
+      console.warn("All local information is cleared, try refreshing the page to restart.");
+    }, 5000);
     window.location.href = u;
   }
 
