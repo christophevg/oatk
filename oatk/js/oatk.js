@@ -101,7 +101,7 @@
     // get well-known to bootstrap
     $.getJSON(well_known_url, function(result) {
       urls = save("oauth_url", result);
-      console.log("got urls!")
+      console.log("got urls!");
       flow();
     });
   }
