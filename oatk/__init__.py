@@ -1,4 +1,4 @@
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 import logging
 logger = logging.getLogger(__name__)
@@ -151,10 +151,14 @@ class OAuthToolkit():
     return jwt.decode( token, options={"verify_signature": False} )
 
   def execute_authenticated(self, f, required_claims=None, *args, **kwargs):
-    code = 403
-    msg  = ""
+    if not "Authorization" in request.headers:
+      return Response("Missing Authorization", 401)
+
+    token = request.headers["Authorization"][7:]
+    code  = 403
+    msg   = ""
+
     try:
-      token = request.headers["Authorization"][7:]
       self.validate(token)
       if required_claims:
         claims = self.decode(token)
@@ -171,9 +175,6 @@ class OAuthToolkit():
             raise ValueError(f"claim {claim} doesn't equal required value")
       # authenticated -> execute
       return f(*args, **kwargs)
-    except KeyError as ex:
-      msg = "Missing Authorization"
-      code = 401
     except ValueError as e:
       msg = str(e)
       logger.warning(msg)
