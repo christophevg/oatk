@@ -1,0 +1,18 @@
+{
+  "include": [
+    "oatk"
+  ],
+
+  "exclude": [
+    "**/__pycache__"
+  ],
+
+  "reportMissingTypeStubs": false,
+  "reportUnannotatedClassAttribute" : false,
+  "reportUnknownArgumentType" : false,
+  "reportMissingParameterType" : false,
+  "reportUnknownMemberType" : false,
+  "reportUnknownParameterType" : false,
+  "reportUnknownVariableType" : false,
+  "reportAny": false
+}
