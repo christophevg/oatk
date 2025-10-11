@@ -1,5 +1,4 @@
 import logging
-logger = logging.getLogger(__name__)
 
 import time
 import random
@@ -8,11 +7,13 @@ import uuid
 import json
 
 from flask import request, session, redirect
-from flask import render_template, redirect, jsonify
+from flask import render_template, jsonify
 from werkzeug.security import gen_salt
 
 from . import server
 from .db import db
+
+logger = logging.getLogger(__name__)
 
 @server.route("/", methods=["GET", "POST"])
 def home():
@@ -76,7 +77,7 @@ def create_client():
         "permission_groups"         : split_by_crlf(form["permission_groups"])
       }
     })
-  except Exception as ex:
+  except Exception:
     logger.exception("failed to register client")
   return redirect("/")
 
@@ -111,7 +112,7 @@ def authorize():
     })
     assert scope == "openid profile"
     assert request.args["response_type"] == "code"
-    nonce = request.args["nonce"]
+    # once = request.args["nonce"]
     logger.info(f"got client: {client}")
   else:
     return render_template("login.html", args=str(request.query_string.decode()))
@@ -175,7 +176,7 @@ def issue_token():
       "permission_groups": client["metadata"]["permission_groups"],
       "username"         : username
     }
-    
+
     encoded = server.oatk.claims(token).token
     return {
       "access_token": encoded,
@@ -187,7 +188,7 @@ def issue_token():
       "scope": "openid permission_groups profile"
     }
 
-  except Exception as ex:
+  except Exception:
     logger.exception("failed to provide token")
   return {}
 

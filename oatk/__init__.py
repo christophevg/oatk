@@ -1,7 +1,6 @@
 __version__ = "0.1.4"
 
 import logging
-logger = logging.getLogger(__name__)
 
 import json
 import uuid
@@ -18,6 +17,8 @@ from flask import request, Response
 import requests
 
 from oatk import fake
+
+logger = logging.getLogger(__name__)
 
 try:
   from AppKit import NSPasteboard, NSStringPboardType
@@ -70,7 +71,7 @@ class OAuthToolkit():
       return
     try:
       self.with_jwks(requests.get(config["jwks_uri"]).content)
-    except:
+    except Exception:
       logger.exception("could not import jwks")
       return
     logger.info(f"succesfully configured from {provider_url}")
@@ -92,10 +93,10 @@ class OAuthToolkit():
     try:
       with open(path_or_string_or_obj) as fp:
         jwks = json.load(fp)
-    except:
+    except Exception:
       try:
         jwks = json.loads(path_or_string_or_obj)
-      except:
+      except Exception:
         jwks = path_or_string_or_obj
     assert isinstance(jwks, dict)
     self._certs = {
@@ -109,7 +110,7 @@ class OAuthToolkit():
   def from_clipboard(self):
     encoded = pb.stringForType_(NSStringPboardType)
     if encoded[:6] == "Bearer":
-      encoded = clip[7:]
+      encoded = encoded[7:]
     self._encoded = encoded.strip() # strip to remove trailing newline
     return self
 
@@ -124,7 +125,8 @@ class OAuthToolkit():
     return jwt.get_unverified_header(token)
 
   def claims(self, claimsdict=None, **claimset):
-    if claimsdict is None: claimsdict = {}
+    if claimsdict is None:
+      claimsdict = {}
     self._claims = claimset
     self._claims.update(claimsdict)
     return self
@@ -151,7 +153,7 @@ class OAuthToolkit():
     return jwt.decode( token, options={"verify_signature": False} )
 
   def execute_authenticated(self, f, required_claims=None, *args, **kwargs):
-    if not "Authorization" in request.headers:
+    if "Authorization" not in request.headers:
       return Response("Missing Authorization", 401)
 
     token = request.headers["Authorization"][7:]
@@ -163,13 +165,13 @@ class OAuthToolkit():
       if required_claims:
         claims = self.decode(token)
         for claim, value in required_claims.items():
-          if not claim in claims:
+          if claim not in claims:
             raise ValueError(f"required claim {claim} is missing")
           if callable(value):
             if not value(claims[claim]):
               raise ValueError(f"claim {claim} doesn't match required criteria")
-          elif type(value) == list:
-            if not value in claims[claim]:
+          elif type(value) is list:
+            if value not in claims[claim]:
               raise ValueError(f"claim {claim} is missing required value")
           elif value != claims[claim]:
             raise ValueError(f"claim {claim} doesn't equal required value")

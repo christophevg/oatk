@@ -1,11 +1,14 @@
 import logging
-logger = logging.getLogger(__name__)
 
 import os
-import sys
+
+from fire import Fire
+from oatk import OAuthToolkit
 
 # load the environment variables for this setup
 from dotenv import load_dotenv, find_dotenv
+
+logger = logging.getLogger(__name__)
 load_dotenv(find_dotenv(usecwd=True))
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL") or "INFO"
@@ -21,12 +24,8 @@ logging.basicConfig(level=LOG_LEVEL, format=FORMAT, datefmt=DATEFMT)
 formatter = logging.Formatter(FORMAT, DATEFMT)
 logging.getLogger().handlers[0].setFormatter(formatter)
 
-from fire import Fire
-
-from oatk import OAuthToolkit
-
 def cli():
   Fire(OAuthToolkit, name="oatk")
-  
+
 if __name__ == '__main__':
   cli()

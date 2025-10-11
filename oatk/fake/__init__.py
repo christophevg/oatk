@@ -1,5 +1,4 @@
 import logging
-logger = logging.getLogger(__name__)
 
 from flask import Flask
 from flask_cors import CORS
@@ -7,6 +6,8 @@ import flask_restful
 
 import json
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 class OATKFlask(Flask):
   def __init__(self, *args, **kwargs):
@@ -20,7 +21,7 @@ class OATKFlask(Flask):
   @oatk.setter
   def oatk(self, o):
     self._oatk = o
-    from . import routes # since our routes refer to server.oath ;-)
+    from . import routes # since our routes refer to server.oath # noqa: F401
 
 server = OATKFlask(__name__)
 CORS(server, resources={r"*": {"origins": "*"}})

@@ -1,13 +1,19 @@
 # load the environment variables for this setup from .env file
 from dotenv import load_dotenv, find_dotenv
-from pathlib import Path
-load_dotenv(find_dotenv())
-load_dotenv(find_dotenv(".env.local"))
 
 import logging
-logger = logging.getLogger(__name__)
 
 import os
+
+from flask import Flask, render_template, Response
+from flask_restful import Resource, Api
+
+import oatk.js
+from oatk import OAuthToolkit
+
+logger = logging.getLogger(__name__)
+load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(".env.local"))
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL") or "INFO"
 
@@ -21,12 +27,6 @@ DATEFMT = "%Y-%m-%d %H:%M:%S %z"
 logging.basicConfig(level=LOG_LEVEL, format=FORMAT, datefmt=DATEFMT)
 formatter = logging.Formatter(FORMAT, DATEFMT)
 logging.getLogger().handlers[0].setFormatter(formatter)
-
-from flask import Flask, render_template, Response
-from flask_restful import Resource, Api
-
-import oatk.js
-from oatk import OAuthToolkit
 
 server = Flask(__name__)
 
@@ -49,7 +49,7 @@ api = Api(server)
 
 # setup oatk
 auth = OAuthToolkit()
-auth.using_provider(os.environ["OAUTH_PROVIDER"]);
+auth.using_provider(os.environ["OAUTH_PROVIDER"])
 auth.with_client_id(os.environ["OAUTH_CLIENT_ID"])
 
 def validate_name(name):
