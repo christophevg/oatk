@@ -1,4 +1,4 @@
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 import logging
 
@@ -29,17 +29,23 @@ except ModuleNotFoundError:
 
 class OAuthToolkit():
   def __init__(self):
-    self._encoded     = None
-    self._certs       = {}
-    self._private_key = None
-    self._public_key  = None
-    self._alg         = "RS256"
-    self._kid         = str(uuid.uuid4())
-    self._claims      = {}
-    self._client_id   = None
-    
-    self.server       = fake.server
-    self.server.oatk  = self
+    self._encoded      = None
+    self._provider_url = None
+    self._certs        = {}
+    logger.warning("certs init")
+    self._private_key  = None
+    self._public_key   = None
+    self._alg          = "RS256"
+    self._kid          = str(uuid.uuid4())
+    self._claims       = {}
+    self._client_id    = None
+
+    self.server        = fake.server
+    self.server.oatk   = self
+
+  def _log_certs(self, msg):
+    logger.info(msg)
+    logger.info(json.dumps(list(self._certs.keys()), indent=2, default=str))
 
   @property
   def version(self):
@@ -61,12 +67,19 @@ class OAuthToolkit():
         backend=default_backend()
       )
     self._certs = { self._kid : self._public_key }
+    self._log_certs("certs set from path to")
     return self
 
   def using_provider(self, provider_url):
+    self._provider_url = provider_url
+    return self.init_from_provider()
+
+  def init_from_provider(self):
+    if not self._provider_url:
+      raise ValueError("missing provider url, use `using_provider` to supply")
     try:
-      config = json.loads(requests.get(provider_url).content)
-    except:
+      config = json.loads(requests.get(self._provider_url).content)
+    except Exception:
       logger.exception("could not retrieve openid configuration")
       return
     try:
@@ -74,7 +87,7 @@ class OAuthToolkit():
     except Exception:
       logger.exception("could not import jwks")
       return
-    logger.info(f"succesfully configured from {provider_url}")
+    logger.info(f"successfully configured from {self._provider_url}")
     return self
 
   def with_client_id(self, client_id):
@@ -103,10 +116,12 @@ class OAuthToolkit():
       key["kid"] : jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
       for key in jwks["keys"]
     }
+    self._log_certs("certs set from jwks to")
+
     if jwks["keys"]:
       self._kid = jwks["keys"][0]["kid"]
     return self
-  
+
   def from_clipboard(self):
     encoded = pb.stringForType_(NSStringPboardType)
     if encoded[:6] == "Bearer":
@@ -145,12 +160,23 @@ class OAuthToolkit():
     alg = self.header(token)["alg"]
     if not token:
       token = self._encoded
-    jwt.decode( token, self._certs[kid], algorithms=[alg], audience=self._client_id )
+    try:
+      cert = self._certs[kid]
+    except KeyError:
+      self._log_certs(f"unknown cert? {kid}")
+      logger.error("retrying provider initialization")
+      _ = self.init_from_provider()
+      try:
+        cert = self._certs[kid]
+      except KeyError:
+        self._log_certs(f"retry failed, still unknown cert? {kid}")
+      raise
+    jwt.decode(token, cert, algorithms=[alg], audience=self._client_id )
 
   def decode(self, token=None):
     if not token:
       token = self._encoded
-    return jwt.decode( token, options={"verify_signature": False} )
+    return jwt.decode(token, options={"verify_signature": False})
 
   def execute_authenticated(self, f, required_claims=None, *args, **kwargs):
     if "Authorization" not in request.headers:
@@ -182,6 +208,7 @@ class OAuthToolkit():
       logger.warning(msg)
     except Exception as e:
       msg = repr(e)
+      # [oatk] [WARNING] unexpected exception: KeyError('17f0f0f14e9cafa9ab5180150ae714c9fd1b5c26')
       logger.warning(f"unexpected exception: {msg}")
     return Response(msg, code)
 
