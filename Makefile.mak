@@ -10,11 +10,11 @@ certs.json: public_key.pem
 server: certs.json
 	python -m oatk with_private private_key.pem with_jwks certs.json server run
 
-app:
+app: env-run
 	gunicorn -b 0.0.0.0:5001 -k eventlet -w 1 examples.client.app:server
 
-api:
+api: env-run
 	gunicorn -b 0.0.0.0:5002 -k eventlet -w 1 examples.web:app
 
-google:
-	gunicorn -k eventlet -w 1 examples.google.app:server	
+google: env-run
+	gunicorn -k eventlet -w 1 examples.google.app:server
