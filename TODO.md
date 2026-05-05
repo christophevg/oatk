@@ -46,13 +46,6 @@
 
 ### Phase 2: Async Implementation
 
-- [ ] **2.1 Add async HTTP client support**
-  - Add `httpx` as optional dependency for async HTTP
-  - Consider also supporting `aiohttp` (or just httpx for both)
-  - Create `oatk/async_client.py` module
-  - Implement async HTTP client abstraction
-  - Keep requests for sync operations
-
 - [ ] **2.2 Design AsyncOAuthToolkit class API**
   - Create `oatk/async_toolkit.py` module
   - Define class `AsyncOAuthToolkit`
@@ -241,4 +234,26 @@
   - Updated install target to use uv sync
   - Updated test target to use uv run pytest
   - Updated lint target to use uv run ruff
-  - Kept pyenv for Python version management
+  - Kept pyenv for Python version management- [x] **1.9 Create CHANGELOG.md**
+  - Initialized with existing version history (0.1.5)
+  - Documented [Unreleased] section with Phase 1 changes
+  - Documented [0.1.5] initial release
+  - Follows Keep a Changelog format
+
+- [x] **1.9 Create CHANGELOG.md**
+  - Initialized with existing version history (0.1.5)
+  - Documented [Unreleased] section with Phase 1 changes
+  - Documented [0.1.5] initial release
+  - Follows Keep a Changelog format
+
+**Phase 1 Complete: Infrastructure Modernization**
+
+### Phase 2: Async Implementation
+
+- [x] **2.1 Add async HTTP client support**
+  - Created oatk/async_client.py with AsyncHttpClient class
+  - Implemented async HTTP client with context manager pattern
+  - Added GET and POST methods for async operations
+  - Created comprehensive test suite (19 tests, all passing)
+  - Added pytest-httpx to dev dependencies
+  - Verified: module imports successfully, all tests pass
