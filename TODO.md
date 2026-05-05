@@ -15,13 +15,6 @@
 
 **Note:** Tasks 1.2 (flask/fake-server extras) and 1.10 (pypi-template) were superseded by Task 1.1. Flask packages are now core dependencies, and metadata is in pyproject.toml.
 
-- [ ] **1.3 Migrate from pyenv virtualenvs to uv managed environments**
-  - Install uv if not present
-  - Update Makefile to use `uv` instead of `pyenv virtualenv`
-  - Create `uv.lock` by running `uv lock`
-  - Document uv workflow in README or contributing guide
-  - Keep pyenv for Python version management
-
 - [ ] **1.4 Add test infrastructure**
   - Create `tests/` directory (currently missing)
   - Add `pytest.ini` or `pyproject.toml [tool.pytest]` configuration
@@ -251,4 +244,8 @@
   - Verified: `uv sync` works, package imports successfully
   - **Decision:** Flask packages moved to core dependencies (not optional) because they're imported unconditionally at module level
 
-**Note:** Task 1.10 (Remove .pypi-template dependency) was incorporated into Task 1.1 - all metadata now in pyproject.toml.
+- [x] **1.3 Migrate from pyenv virtualenvs to uv managed environments**
+  - Updated Makefile to use uv commands
+  - Simplified environment management (single .venv)
+  - Kept pyenv for Python version management
+  - Verified: make install, make lint work correctly
