@@ -1483,6 +1483,8 @@ dependencies = [
 
 [package.optional-dependencies]
 async = [
+    { name = "anyio", version = "4.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "anyio", version = "4.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "httpx" },
 ]
 dev = [
@@ -1507,6 +1509,7 @@ run = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anyio", marker = "extra == 'async'" },
     { name = "authlib" },
     { name = "coverage", marker = "extra == 'dev'" },
     { name = "cryptography" },

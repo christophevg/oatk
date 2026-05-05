@@ -46,19 +46,24 @@
 
 ### Phase 2: Async Implementation
 
-- [ ] **2.2 Design AsyncOAuthToolkit class API**
-  - Create `oatk/async_toolkit.py` module
-  - Define class `AsyncOAuthToolkit`
-  - Mirror OAuthToolkit API for async operations
-  - Implement `async using_provider()` method
-  - Implement `async init_from_provider()` method
-  - Implement `async with_jwks()` (if async file I/O needed)
+- [x] **2.2 Design AsyncOAuthToolkit class API**
+  - Created `oatk/async_toolkit.py` module with AsyncOAuthToolkit class
+  - Mirrored OAuthToolkit API for async operations
+  - Implemented `async using_provider()` method
+  - Implemented `async init_from_provider()` method using AsyncHttpClient
+  - Implemented `async with_jwks()` with async file I/O using anyio
+  - Implemented `async with_private()` and `async with_public()` methods
+  - Implemented `async from_file()` method
+  - Created comprehensive test suite with pytest-asyncio
+  - Exported AsyncOAuthToolkit from main module
+  - Added anyio to async dependencies in pyproject.toml
 
-- [ ] **2.3 Implement async token operations**
-  - Implement `async validate()` method
-  - Consider `run_in_executor` for CPU-bound JWT validation
-  - Implement `async decode()` method (mostly sync, but async-compatible)
-  - Ensure token generation remains sync (CPU-bound)
+- [x] **2.3 Implement async token operations**
+  - Implemented `async validate()` method using anyio.to_thread.run_sync()
+  - Token generation remains sync (CPU-bound property)
+  - Token decode remains sync (CPU-bound operation)
+  - All async operations properly use await
+  - Tests verify both sync and async operations
 
 - [ ] **2.4 Create async decorators**
   - Create `authenticated_async` decorator for ASGI frameworks

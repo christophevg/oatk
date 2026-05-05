@@ -51,6 +51,7 @@ run = [
 ]
 async = [
   "httpx",
+  "anyio",
 ]
 
 [project.urls]

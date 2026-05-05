@@ -247,3 +247,16 @@ class OAuthToolkit:
       return wrapper
 
     return decorator
+
+
+# Export async version
+from oatk.async_toolkit import AsyncOAuthToolkit
+
+__all__ = [
+  "OAuthToolkit",
+  "AsyncOAuthToolkit",
+  "ClaimsDict",
+  "JWKSDict",
+  "Decorator",
+  "RequiredClaims",
+]
