@@ -1,0 +1,139 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oatk"
+dynamic = ["version"]
+description = "A collection of useful functions for dealing with OAuth"
+readme = ".github/README.md"
+license = "MIT"
+authors = [
+  { name = "Christophe VG", email = "contact@christophe.vg" }
+]
+keywords = ["oauth", "human"]
+classifiers = [
+  "Topic :: Security :: Cryptography",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Development Status :: 4 - Beta",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "pyjwt",
+  "cryptography",
+  "authlib",
+  "requests",
+  "fire",
+  "python-dotenv",
+  "flask",
+  "flask-cors",
+  "flask-restful",
+  "pymongo",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+  "mypy",
+  "coverage",
+]
+run = [
+  "gunicorn",
+  "eventlet",
+]
+async = [
+  "httpx",
+]
+
+[project.urls]
+Homepage = "https://github.com/christophevg/oatk"
+Repository = "https://github.com/christophevg/oatk"
+
+[project.scripts]
+oatk = "oatk.__main__:cli"
+
+[tool.hatch.version]
+path = "oatk/__init__.py"
+pattern = "__version__ = ['\"](?P<version>[^'\"]+)['\"]"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+  "E",      # pycodestyle errors
+  "W",      # pycodestyle warnings
+  "F",      # Pyflakes
+  "I",      # isort
+  "B",      # flake8-bugbear
+  "C4",     # flake8-comprehensions
+  "UP",     # pyupgrade
+  "ARG",    # flake8-unused-arguments
+  "SIM",    # flake8-simplify
+]
+ignore = [
+  "E501",   # line too long (handled by formatter)
+  "B008",   # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["oatk"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_context = true
+show_column_numbers = true
+
+[[tool.mypy.overrides]]
+module = [
+  "jwt.*",
+  "authlib.*",
+  "cryptography.*",
+  "flask.*",
+  "flask_cors",
+  "flask_restful",
+  "pymongo.*",
+  "requests.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["oatk"]
+branch = true
+omit = [
+  "*/tests/*",
+  "*/__main__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

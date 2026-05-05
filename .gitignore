@@ -8,7 +8,6 @@ build
 .tox
 docs/_build
 *.backup
-.python-version
 local
 .DS_Store
 certs.json
