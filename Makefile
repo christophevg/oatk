@@ -84,15 +84,15 @@ lint:
 
 publish-test: dist
 	@echo "👷‍♂️ $(BLUE)publishing to PyPI test$(NC)"
-	@uv run twine upload --repository testpypi dist/*
+	uv publish --repository testpypi
 
 publish: dist
 	@echo "👷‍♂️ $(BLUE)publishing to PyPI$(NC)"
-	@uv run twine upload dist/*
+	uv publish
 
 dist: dist-clean
 	@echo "👷‍♂️ $(BLUE)building distribution$(NC)"
-	@uv run python -m build
+	uv build
 
 dist-clean:
 	@rm -rf dist build *.egg-info
