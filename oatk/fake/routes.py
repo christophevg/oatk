@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 import random
 import string
 import time
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from flask import jsonify, redirect, render_template, request, session
 from werkzeug.security import gen_salt
@@ -147,7 +149,7 @@ def authorize() -> str:
   return render_template("authorize.html", grant=grant)
 
 @server.route("/oauth/token", methods=["POST"])
-def issue_token() -> Dict[str, Any]:
+def issue_token() -> dict[str, Any]:
   try:
     code = db["codes"].find_one({"code": request.json["code"]})
     client = db["clients"].find_one(
@@ -194,7 +196,7 @@ def issue_token() -> Dict[str, Any]:
 
 @server.route("/oauth/userinfo")
 @server.oatk.authenticated_with_claims(scope="profile")
-def api_me() -> Dict[str, str]:
+def api_me() -> dict[str, str]:
   logger.warn("TODO implement actual userinfo")
   return {"hello": "world", "STILL": "TODO"}
 
@@ -231,14 +233,14 @@ def logout() -> str:
 # helper functions
 
 
-def current_user() -> Optional[Dict[str, Any]]:
+def current_user() -> dict[str, Any] | None:
   if "id" in session:
     uid = session["id"]
     return db["users"].find_one({"_id": uid})
   return None
 
 
-def split_by_crlf(s: str) -> List[str]:
+def split_by_crlf(s: str) -> list[str]:
   return [v for v in s.splitlines() if v]
 
 

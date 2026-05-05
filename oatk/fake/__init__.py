@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import flask_restful
 from flask import Flask
@@ -13,10 +15,10 @@ logger = logging.getLogger(__name__)
 class OATKFlask(Flask):
   def __init__(self, *args: Any, **kwargs: Any) -> None:
     Flask.__init__(self, *args, **kwargs)
-    self._oatk: Optional[Any] = None
+    self._oatk: Any | None = None
 
   @property
-  def oatk(self) -> Optional[Any]:
+  def oatk(self) -> Any | None:
     return self._oatk
 
   @oatk.setter

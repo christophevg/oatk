@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 __version__ = "0.1.5"
 
 import json
 import logging
 import uuid
+from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import jwt
 import requests
@@ -15,6 +18,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPubl
 from flask import Response, request
 
 from oatk import fake
+from oatk.async_toolkit import AsyncOAuthToolkit
 from oatk.types import ClaimsDict, Decorator, JWKSDict, RequiredClaims
 
 logger = logging.getLogger(__name__)
@@ -25,23 +29,23 @@ if TYPE_CHECKING:
 try:
   from AppKit import NSPasteboard, NSStringPboardType
 
-  pb: Optional[NSPasteboard] = NSPasteboard.generalPasteboard()
+  pb: NSPasteboard | None = NSPasteboard.generalPasteboard()
 except ModuleNotFoundError:
   logger.debug("No AppKit installed, so no MacOS clipboard support!")
   pb = None
 
 class OAuthToolkit:
   def __init__(self) -> None:
-    self._encoded: Optional[str] = None
-    self._provider_url: Optional[str] = None
-    self._certs: Dict[str, RSAPublicKey] = {}
+    self._encoded: str | None = None
+    self._provider_url: str | None = None
+    self._certs: dict[str, RSAPublicKey] = {}
     logger.warning("certs init")
-    self._private_key: Optional[RSAPrivateKey] = None
-    self._public_key: Optional[RSAPublicKey] = None
+    self._private_key: RSAPrivateKey | None = None
+    self._public_key: RSAPublicKey | None = None
     self._alg: str = "RS256"
     self._kid: str = str(uuid.uuid4())
     self._claims: ClaimsDict = {}
-    self._client_id: Optional[str] = None
+    self._client_id: str | None = None
 
     self.server = fake.server
     self.server.oatk = self
@@ -54,14 +58,14 @@ class OAuthToolkit:
   def version(self) -> str:
     return __version__
 
-  def with_private(self, path: str) -> "OAuthToolkit":
+  def with_private(self, path: str) -> OAuthToolkit:
     with open(path, "rb") as fp:
       self._private_key = serialization.load_pem_private_key(
         fp.read(), password=None, backend=default_backend()
       )
     return self
 
-  def with_public(self, path: str) -> "OAuthToolkit":
+  def with_public(self, path: str) -> OAuthToolkit:
     with open(path, "rb") as fp:
       self._public_key = serialization.load_pem_public_key(
         fp.read(), backend=default_backend()
@@ -70,11 +74,11 @@ class OAuthToolkit:
     self._log_certs("certs set from path to")
     return self
 
-  def using_provider(self, provider_url: str) -> Optional["OAuthToolkit"]:
+  def using_provider(self, provider_url: str) -> OAuthToolkit | None:
     self._provider_url = provider_url
     return self.init_from_provider()
 
-  def init_from_provider(self) -> Optional["OAuthToolkit"]:
+  def init_from_provider(self) -> OAuthToolkit | None:
     if not self._provider_url:
       raise ValueError("missing provider url, use `using_provider` to supply")
     try:
@@ -90,7 +94,7 @@ class OAuthToolkit:
     logger.info(f"successfully configured from {self._provider_url}")
     return self
 
-  def with_client_id(self, client_id: str) -> "OAuthToolkit":
+  def with_client_id(self, client_id: str) -> OAuthToolkit:
     self._client_id = client_id
     return self
 
@@ -106,8 +110,8 @@ class OAuthToolkit:
     )
 
   def with_jwks(
-    self, path_or_string_or_obj: Union[str, bytes, JWKSDict]
-  ) -> "OAuthToolkit":
+    self, path_or_string_or_obj: str | bytes | JWKSDict
+  ) -> OAuthToolkit:
     try:
       with open(path_or_string_or_obj) as fp:
         jwks: JWKSDict = json.load(fp)
@@ -127,7 +131,7 @@ class OAuthToolkit:
       self._kid = jwks["keys"][0]["kid"]
     return self
 
-  def from_clipboard(self) -> "OAuthToolkit":
+  def from_clipboard(self) -> OAuthToolkit:
     if pb is None:
       raise RuntimeError("Clipboard not available on this platform")
     encoded = pb.stringForType_(NSStringPboardType)
@@ -136,19 +140,19 @@ class OAuthToolkit:
     self._encoded = encoded.strip()  # strip to remove trailing newline
     return self
 
-  def from_file(self, path: str) -> "OAuthToolkit":
+  def from_file(self, path: str) -> OAuthToolkit:
     with open(path) as fp:
       self._encoded = fp.read().strip()  # strip to remove trailing newline
     return self
 
-  def header(self, token: Optional[str] = None) -> Dict[str, Any]:
+  def header(self, token: str | None = None) -> dict[str, Any]:
     if not token:
       token = self._encoded
     return jwt.get_unverified_header(token)
 
   def claims(
-    self, claimsdict: Optional[ClaimsDict] = None, **claimset: Any
-  ) -> "OAuthToolkit":
+    self, claimsdict: ClaimsDict | None = None, **claimset: Any
+  ) -> OAuthToolkit:
     if claimsdict is None:
       claimsdict = {}
     self._claims = claimset
@@ -156,7 +160,7 @@ class OAuthToolkit:
     return self
 
   @property
-  def token(self) -> Optional[str]:
+  def token(self) -> str | None:
     if self._private_key:
       return jwt.encode(
         self._claims,
@@ -166,7 +170,7 @@ class OAuthToolkit:
       )
     return None
 
-  def validate(self, token: Optional[str] = None) -> Dict[str, Any]:
+  def validate(self, token: str | None = None) -> dict[str, Any]:
     kid = self.header(token)["kid"]
     alg = self.header(token)["alg"]
     if not token:
@@ -184,7 +188,7 @@ class OAuthToolkit:
         raise
     return jwt.decode(token, cert, algorithms=[alg], audience=self._client_id)
 
-  def decode(self, token: Optional[str] = None) -> Dict[str, Any]:
+  def decode(self, token: str | None = None) -> dict[str, Any]:
     if not token:
       token = self._encoded
     return jwt.decode(token, options={"verify_signature": False})
@@ -192,10 +196,10 @@ class OAuthToolkit:
   def execute_authenticated(
     self,
     f: Callable[..., Any],
-    required_claims: Optional[RequiredClaims] = None,
+    required_claims: RequiredClaims | None = None,
     *args: Any,
     **kwargs: Any,
-  ) -> Union[Response, Any]:
+  ) -> Response | Any:
     if "Authorization" not in request.headers:
       return Response("Missing Authorization", 401)
 
@@ -237,7 +241,7 @@ class OAuthToolkit:
     return wrapper
 
   def authenticated_with_claims(
-    self, **required_claims: Union[str, Callable[[Any], bool]]
+    self, **required_claims: str | Callable[[Any], bool]
   ) -> Decorator:
     def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
       @wraps(f)
@@ -248,9 +252,6 @@ class OAuthToolkit:
 
     return decorator
 
-
-# Export async version
-from oatk.async_toolkit import AsyncOAuthToolkit
 
 __all__ = [
   "OAuthToolkit",

@@ -5,8 +5,10 @@ This module provides async HTTP client support using httpx, while maintaining
 backward compatibility with the synchronous requests-based operations.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import httpx
 
@@ -38,10 +40,10 @@ class AsyncHttpClient:
     Args:
         timeout: Default timeout for HTTP requests in seconds
     """
-    self._client: Optional[httpx.AsyncClient] = None
+    self._client: httpx.AsyncClient | None = None
     self._timeout = timeout
 
-  async def __aenter__(self) -> "AsyncHttpClient":
+  async def __aenter__(self) -> AsyncHttpClient:
     """
     Enter async context manager and create the HTTP client.
 
@@ -67,8 +69,8 @@ class AsyncHttpClient:
   async def get(
     self,
     url: str,
-    params: Optional[Dict[str, Any]] = None,
-    headers: Optional[Dict[str, str]] = None,
+    params: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
   ) -> httpx.Response:
     """
     Perform an async HTTP GET request.
@@ -98,9 +100,9 @@ class AsyncHttpClient:
   async def post(
     self,
     url: str,
-    data: Optional[Dict[str, Any]] = None,
-    json: Optional[Dict[str, Any]] = None,
-    headers: Optional[Dict[str, str]] = None,
+    data: dict[str, Any] | None = None,
+    json: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
   ) -> httpx.Response:
     """
     Perform an async HTTP POST request.
