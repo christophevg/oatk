@@ -18,3 +18,10 @@ api: env-run
 
 google: env-run
 	gunicorn -k eventlet -w 1 examples.google.app:server
+
+#MODEL=qwen3.5:397b-cloud
+#ARGS += --plugin-dir ./
+ARGS += --agent c3:project-manager
+ARGS += --plugin-dir ../c3
+
+-include ~/.claude/Makefile

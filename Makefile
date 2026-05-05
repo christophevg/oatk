@@ -1,12 +1,3 @@
-#MODEL=qwen3.5:397b-cloud
-#ARGS += --plugin-dir ./
-ARGS += --agent c3:project-manager
-ARGS += --plugin-dir ../c3
-
--include ~/.claude/Makefile
-
--include .env
-
 # colors
 
 GREEN=\033[0;32m
@@ -14,25 +5,7 @@ RED=\033[0;31m
 BLUE=\033[0;34m
 NC=\033[0m
 
-# Python version for ruff
-
 RUFF_PYTHON_VERSION ?= py311
-
-PROJECT=$(shell basename $(CURDIR))
-
-PACKAGE_NAME=`cat .pypi-template | grep "^package_module_name" | cut -d":" -f2 | xargs`
-
-LOG_LEVEL?=INFO
-
-# if we're inside our own repo folder, use the local module folder, else cli cmd
-ifeq ($(wildcard pypi_template),)
-  PYPI_TEMPLATE = pypi-template
-else
-  PYPI_TEMPLATE = python -m pypi_template
-endif
-
-RUN_CMD?=LOG_LEVEL=$(LOG_LEVEL) uv run python -m $(PACKAGE_NAME)
-RUN_ARGS?=
 
 # Installation targets - uv manages virtualenvs automatically
 
@@ -52,21 +25,9 @@ upgrade:
 	@echo "👷‍♂️ $(BLUE)upgrading all packages$(NC)"
 	@uv sync --all-extras --upgrade
 
-# apply current pypi-template configuration, typically after upgrading it
-apply: RUN_CMD=$(PYPI_TEMPLATE)
-apply: RUN_ARGS=verbose apply
-apply: run
-
-# apply and reinstall
-update: apply reinstall
-
 # functional targets
 
-run:
-	@echo "👷‍♂️ $(BLUE)running$(GREEN) $(RUN_CMD) $(RUN_ARGS)$(NC)"
-	@$(RUN_CMD) $(RUN_ARGS)
-
-test: lint pytest
+test: lint typecheck pytest
 
 pytest:
 	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
@@ -79,6 +40,10 @@ coverage:
 lint:
 	@echo "👷‍♂️ $(BLUE)running linter$(NC)"
 	@uv run --extra dev ruff check --target-version=$(RUFF_PYTHON_VERSION) .
+
+typecheck:
+	@echo "👷‍♂️ $(BLUE)running type checking$(NC)"
+	@uv run mypy --strict oatk
 
 # packaging targets
 
