@@ -34,12 +34,6 @@
   - Update Makefile to use `uv run mypy`
   - Update pyrightconfig.json to align with mypy settings
 
-- [ ] **1.7 Add type hints to existing code**
-  - Add type hints to all public methods in OAuthToolkit
-  - Add type hints to helper functions
-  - Add type hints to fake server routes (where practical)
-  - Create `oatk/types.py` for custom type definitions if needed
-  - Ensure mypy passes without errors
 
 
 - [ ] **1.9 Create CHANGELOG.md**

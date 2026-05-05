@@ -110,8 +110,18 @@ module = [
   "flask_restful",
   "pymongo.*",
   "requests.*",
+  "fire",
+  "AppKit",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["oatk.fake.*", "oatk"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["oatk.fake.*"]
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

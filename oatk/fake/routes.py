@@ -1,13 +1,12 @@
+import json
 import logging
-
-import time
 import random
 import string
+import time
 import uuid
-import json
+from typing import Any, Dict, List, Optional
 
-from flask import request, session, redirect
-from flask import render_template, jsonify
+from flask import jsonify, redirect, render_template, request, session
 from werkzeug.security import gen_salt
 
 from . import server
@@ -16,7 +15,7 @@ from .db import db
 logger = logging.getLogger(__name__)
 
 @server.route("/", methods=["GET", "POST"])
-def home():
+def home() -> str:
   """
   The root/home page allows a user to login (POST) and manage its clients.
   Nothing OAuth to see here, just to server's own functionality.
@@ -24,9 +23,9 @@ def home():
   """
   if request.method == "POST":
     username = request.form.get("username")
-    user = db["users"].find_one({"username" : username})
+    user = db["users"].find_one({"username": username})
     if not user:
-      user = { "username": username, "_id" : str(uuid.uuid4()) }
+      user = {"username": username, "_id": str(uuid.uuid4())}
       db["users"].insert_one(user)
     session["id"] = user["_id"]
     return redirect("/")
@@ -34,15 +33,15 @@ def home():
   # GET
   user = current_user()
   if user:
-    clients = list(db["clients"].find({"user_id" : user["_id"]}))
+    clients = list(db["clients"].find({"user_id": user["_id"]}))
     for client in clients:
-      client["_id"] = str(client["_id"]) # turn Mongo ObjectID into string
+      client["_id"] = str(client["_id"])  # turn Mongo ObjectID into string
     return render_template("home.html", user=user, clients=clients)
   else:
     return render_template("login.html")
 
 @server.route("/oauth/create-client", methods=["GET", "POST"])
-def create_client():
+def create_client() -> str:
   """
   The Create Client page allows a user to create a new client registration.
   Client registration is required for an external application to interact and
@@ -61,28 +60,30 @@ def create_client():
   # POST
   form = request.form
   try:
-    db["clients"].insert_one({
-      "client_id"           : form["client_id"],
-      "user_id"             : user["_id"],
-      "client_id_issued_at" : int(time.time()),
-      "client_secret"       : form["client_secret"],
-      "metadata" : {
-        "client_name"               : form["client_name"],
-        "client_uri"                : form["client_uri"],
-        "grant_types"               : split_by_crlf(form["grant_type"]),
-        "redirect_uris"             : split_by_crlf(form["redirect_uri"]),
-        "response_types"            : split_by_crlf(form["response_type"]),
-        "scope"                     : form["scope"],
-        "allowed-origins"           : split_by_crlf(form["allowed_origins"]),
-        "permission_groups"         : split_by_crlf(form["permission_groups"])
+    db["clients"].insert_one(
+      {
+        "client_id": form["client_id"],
+        "user_id": user["_id"],
+        "client_id_issued_at": int(time.time()),
+        "client_secret": form["client_secret"],
+        "metadata": {
+          "client_name": form["client_name"],
+          "client_uri": form["client_uri"],
+          "grant_types": split_by_crlf(form["grant_type"]),
+          "redirect_uris": split_by_crlf(form["redirect_uri"]),
+          "response_types": split_by_crlf(form["response_type"]),
+          "scope": form["scope"],
+          "allowed-origins": split_by_crlf(form["allowed_origins"]),
+          "permission_groups": split_by_crlf(form["permission_groups"]),
+        },
       }
-    })
+    )
   except Exception:
     logger.exception("failed to register client")
   return redirect("/")
 
 @server.route("/oauth/authorize", methods=["GET", "POST"])
-def authorize():
+def authorize() -> str:
   """
   The first real OAuth route, and the first to hit in the flow. The application
   redirects the browser here to receive back an authoriation code. If the user
@@ -94,22 +95,19 @@ def authorize():
     username = request.form.get("username")
     logger.info(f"got {username}")
     if username:
-      user = db["users"].find_one({"username" : username})
+      user = db["users"].find_one({"username": username})
       logger.info(f"found user in db: {user}")
       if user:
         session["id"] = user["_id"]
 
   client_id = request.args["client_id"]
-  scope     = request.args["scope"]
+  scope = request.args["scope"]
 
   # retrieve client for user
   user = current_user()
   logger.info(f"current_user: {user}")
   if user:
-    client = db["clients"].find_one({
-      "user_id"   : user["_id"],
-      "client_id" : client_id
-    })
+    client = db["clients"].find_one({"user_id": user["_id"], "client_id": client_id})
     assert scope == "openid profile"
     assert request.args["response_type"] == "code"
     # once = request.args["nonce"]
@@ -123,13 +121,15 @@ def authorize():
       logger.info("get positive confirmation... redirecting with code...")
       redirect_uri = client["metadata"]["redirect_uris"][0]
       code = generate_token()
-      db["codes"].insert_one({
-        "code"         : code,
-        "client_id"    : client["client_id"],
-        "user_id"      : client["user_id"],
-        "redirect_uri" : redirect_uri,
-        "scope"        : "openid"
-      })
+      db["codes"].insert_one(
+        {
+          "code": code,
+          "client_id": client["client_id"],
+          "user_id": client["user_id"],
+          "redirect_uri": redirect_uri,
+          "scope": "openid",
+        }
+      )
       goto = f"{redirect_uri}?code={code}"
       logger.debug(goto)
       return redirect(goto, 302)
@@ -138,43 +138,42 @@ def authorize():
     grants = client["metadata"]["grant_types"]
     assert "authorization_code" in grants
     grant = {
-      "client"  : { "client_name" : client["metadata"]["client_name"] },
-      "request" : { "scope"       : scope }
+      "client": {"client_name": client["metadata"]["client_name"]},
+      "request": {"scope": scope},
     }
   except Exception as error:
     logger.exception(error)
-    return jsonify({"error" : str(error)})
+    return jsonify({"error": str(error)})
   return render_template("authorize.html", grant=grant)
 
 @server.route("/oauth/token", methods=["POST"])
-def issue_token():
+def issue_token() -> Dict[str, Any]:
   try:
-    code = db["codes"].find_one({"code" : request.json["code"] })
-    client = db["clients"].find_one({
-      "user_id"   : code["user_id"],
-      "client_id" : code["client_id"]
-    })
-    user = db["users"].find_one({"_id" : code["user_id"]})
+    code = db["codes"].find_one({"code": request.json["code"]})
+    client = db["clients"].find_one(
+      {"user_id": code["user_id"], "client_id": code["client_id"]}
+    )
+    user = db["users"].find_one({"_id": code["user_id"]})
     username = user["username"]
 
     now = round(time.time())
     token = {
-      "iat"              : now,
-      "exp"              : now + 300,
-      "auth_time"        : now,
-      "jti"              : str(uuid.uuid4()),
-      "iss"              : request.url_root.rstrip("/"),
-      "sub"              : f"f:{str(uuid.uuid4())}:{client['metadata']['client_name']}",
-      "typ"              : "Bearer",
-      "azp"              : "development",
-      "nonce"            : "nonce-TODO",
-      "session_state"    : "52ad15e0-4afb-4b04-8897-8e08b262a73d",
-      "acr"              : "0",
-      "allowed-origins"  : client["metadata"]["allowed-origins"],
-      "scope"            : "openid profile permission_groups",
-      "sid"              : "52ad15e0-4afb-4b04-8897-8e08b262a73d",
+      "iat": now,
+      "exp": now + 300,
+      "auth_time": now,
+      "jti": str(uuid.uuid4()),
+      "iss": request.url_root.rstrip("/"),
+      "sub": f"f:{str(uuid.uuid4())}:{client['metadata']['client_name']}",
+      "typ": "Bearer",
+      "azp": "development",
+      "nonce": "nonce-TODO",
+      "session_state": "52ad15e0-4afb-4b04-8897-8e08b262a73d",
+      "acr": "0",
+      "allowed-origins": client["metadata"]["allowed-origins"],
+      "scope": "openid profile permission_groups",
+      "sid": "52ad15e0-4afb-4b04-8897-8e08b262a73d",
       "permission_groups": client["metadata"]["permission_groups"],
-      "username"         : username
+      "username": username,
     }
 
     encoded = server.oatk.claims(token).token
@@ -185,7 +184,7 @@ def issue_token():
       "token_type": "Bearer",
       "id_token": "TODO:id_token",
       "not-before-policy": str(time.time()),
-      "scope": "openid permission_groups profile"
+      "scope": "openid permission_groups profile",
     }
 
   except Exception:
@@ -195,46 +194,59 @@ def issue_token():
 
 @server.route("/oauth/userinfo")
 @server.oatk.authenticated_with_claims(scope="profile")
-def api_me():
+def api_me() -> Dict[str, str]:
   logger.warn("TODO implement actual userinfo")
-  return { "hello" : "world", "STILL": "TODO" }
+  return {"hello": "world", "STILL": "TODO"}
+
 
 @server.route("/oauth/certs")
-def certs():
+def certs() -> str:
   return json.dumps(server.oatk.jwks, indent=2)
 
+
 @server.route("/oauth/well-known")
-def well_known():
+def well_known() -> str:
   me = request.url_root.rstrip("/")
-  return json.dumps({
-    "issuer"                 : f"{me}",
-    "jwks_uri"               : f"{me}/oauth/certs",
-    "authorization_endpoint" : f"{me}/oauth/authorize",
-    "token_endpoint"         : f"{me}/oauth/token",
-    "userinfo_endpoint"      : f"{me}/oauth/userinfo",
-    "end_session_endpoint"   : f"{me}/oauth/logout",
-    "registration_endpoint"  : f"{me}/oauth/create-client",
-  }, indent=2)
+  return json.dumps(
+    {
+      "issuer": f"{me}",
+      "jwks_uri": f"{me}/oauth/certs",
+      "authorization_endpoint": f"{me}/oauth/authorize",
+      "token_endpoint": f"{me}/oauth/token",
+      "userinfo_endpoint": f"{me}/oauth/userinfo",
+      "end_session_endpoint": f"{me}/oauth/logout",
+      "registration_endpoint": f"{me}/oauth/create-client",
+    },
+    indent=2,
+  )
+
 
 @server.route("/oauth/logout")
-def logout():
+def logout() -> str:
   session.pop("id", None)
   goto = "/"
   return redirect(goto, 302)
 
+
 # helper functions
 
-def current_user():
+
+def current_user() -> Optional[Dict[str, Any]]:
   if "id" in session:
     uid = session["id"]
-    return db["users"].find_one({"_id" : uid})
+    return db["users"].find_one({"_id": uid})
   return None
 
-def split_by_crlf(s):
+
+def split_by_crlf(s: str) -> List[str]:
   return [v for v in s.splitlines() if v]
+
 
 UNICODE_ASCII_CHARACTER_SET = string.ascii_letters + string.digits
 
-def generate_token(length=30, chars=UNICODE_ASCII_CHARACTER_SET):
+
+def generate_token(
+  length: int = 30, chars: str = UNICODE_ASCII_CHARACTER_SET
+) -> str:
   rand = random.SystemRandom()
-  return ''.join(rand.choice(chars) for _ in range(length))
+  return "".join(rand.choice(chars) for _ in range(length))

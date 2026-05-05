@@ -1,11 +1,12 @@
 import os
 
 from pymongo import MongoClient
+from pymongo.database import Database
 
 connection_string = os.environ.get("MONGO_URL", "mongodb://localhost:27017/oatk")
-server, db_name   = connection_string.rsplit("/", 1)
-client            = MongoClient(server)
-db                = client[db_name]
+server, db_name = connection_string.rsplit("/", 1)
+client = MongoClient(server)
+db: Database = client[db_name]
 
 
 
