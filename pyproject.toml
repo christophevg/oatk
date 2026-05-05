@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "oatk"
 dynamic = ["version"]
 description = "A collection of useful functions for dealing with OAuth"
-readme = ".github/README.md"
+readme = "README.md"
 license = "MIT"
 authors = [
   { name = "Christophe VG", email = "contact@christophe.vg" }

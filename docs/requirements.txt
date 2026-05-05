@@ -1,0 +1,23 @@
+# Sphinx documentation build requirements
+
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.19.0
+
+# Dependencies for autodoc
+pyjwt
+cryptography
+authlib
+requests
+fire
+python-dotenv
+flask
+flask-cors
+flask-restful
+pymongo
+
+# Optional dependencies for async docs
+httpx
+anyio
+quart
+fastapi
