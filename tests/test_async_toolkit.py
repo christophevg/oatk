@@ -14,10 +14,8 @@ Tests verify:
 
 import json
 import tempfile
-from pathlib import Path
 
 import pytest
-import jwt
 
 from oatk.async_toolkit import AsyncOAuthToolkit
 
@@ -366,9 +364,10 @@ class TestAsyncOAuthToolkitValidation:
     When: Calling validate() asynchronously
     Then: Should validate using JWKS keys
     """
-    from oatk import OAuthToolkit
+
     from authlib.jose import jwk
-    import uuid
+
+    from oatk import OAuthToolkit
 
     # Create a token with the sync toolkit using the key pair
     sync_toolkit = OAuthToolkit()
@@ -461,7 +460,7 @@ class TestAsyncOAuthToolkitDecode:
   """Test AsyncOAuthToolkit decode method."""
 
   @pytest.mark.asyncio
-  async def test_decode_token_without_validation(self, private_key_file, public_key_file):
+  async def test_decode_token_without_validation(self, private_key_file, public_key_file):  # noqa: ARG002
     """
     Given: An AsyncOAuthToolkit and a token
     When: Calling decode() without public key

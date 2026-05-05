@@ -9,8 +9,6 @@ This module provides reusable test fixtures for:
 """
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
 from cryptography.hazmat.backends import default_backend
@@ -126,8 +124,9 @@ def jwks_dict(rsa_key_pair):
     Returns:
         dict: JWKS dictionary with keys array
     """
-    from authlib.jose import jwk
     import uuid
+
+    from authlib.jose import jwk
 
     kid = str(uuid.uuid4())
     public_key = rsa_key_pair["public_key_obj"]

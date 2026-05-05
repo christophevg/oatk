@@ -11,6 +11,7 @@ Tests verify:
 """
 
 import json
+
 import pytest
 
 from oatk import OAuthToolkit
@@ -332,6 +333,7 @@ class TestTokenValidation:
         """
         # This test verifies token validation with matching kid
         # Expected behavior: Token validates successfully
+        configured_oauth_toolkit.with_client_id(configured_oauth_toolkit._claims.get("aud"))
         token = configured_oauth_toolkit.token
         # Validation should not raise exception
         result = configured_oauth_toolkit.validate(token)
@@ -345,11 +347,13 @@ class TestTokenValidation:
         Then: Should validate if client_id not set
         """
         # This test validates token without client_id
-        # Expected behavior: Validation succeeds
+        # Create a token without audience claim to avoid validation
+        configured_oauth_toolkit._claims.pop("aud", None)
+        configured_oauth_toolkit._client_id = None
         token = configured_oauth_toolkit.token
+        result = configured_oauth_toolkit.validate(token)
 
-        # Should not raise exception
-        configured_oauth_toolkit.validate(token)
+        assert result["sub"] == configured_oauth_toolkit._claims["sub"]
 
     def test_validate_token_with_client_id(self, configured_oauth_toolkit):
         """
@@ -374,14 +378,17 @@ class TestTokenValidation:
         Then: Should raise exception
         """
         # This test verifies audience validation
-        # Expected behavior: Exception raised for wrong audience
+        # First set correct audience
+        configured_oauth_toolkit.with_client_id(configured_oauth_toolkit._claims.get("aud"))
         token = configured_oauth_toolkit.token
+        # Then set wrong client_id
         configured_oauth_toolkit.with_client_id("wrong-client-id")
 
-        with pytest.raises(Exception):
+        # JWT raises InvalidAudienceError for wrong audience - we catch it as Exception
+        with pytest.raises(Exception):  # noqa: B017
             configured_oauth_toolkit.validate(token)
 
-    def test_validate_token_with_unknown_kid(self, oauth_toolkit_with_jwks):
+    def test_validate_token_with_unknown_kid(self, oauth_toolkit_with_jwks):  # noqa: ARG002
         """
         Given: A token with unknown kid
         When: Validating the token
@@ -389,7 +396,6 @@ class TestTokenValidation:
         """
         # This test verifies unknown kid handling
         # Expected behavior: KeyError for unknown kid
-        import jwt
 
         # Create a token with a different kid
         # This is a bit tricky - we need to create a token with unknown kid
@@ -442,7 +448,6 @@ class TestTokenHeader:
         """
         # This test verifies header extraction
         # Expected behavior: Header dictionary returned
-        import jwt
 
         token = configured_oauth_toolkit.token
         header = configured_oauth_toolkit.header(token)

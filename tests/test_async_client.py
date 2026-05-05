@@ -9,8 +9,8 @@ Tests verify:
 - Connection state management
 """
 
-import pytest
 import httpx
+import pytest
 
 from oatk.async_client import AsyncHttpClient
 

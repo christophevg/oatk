@@ -14,9 +14,9 @@ import asyncio
 import time
 
 import pytest
-from fastapi import FastAPI, Depends
-from fastapi.testclient import TestClient
+from fastapi import Depends, FastAPI
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.testclient import TestClient
 
 from oatk.async_toolkit import AsyncOAuthToolkit
 from oatk.fastapi import OAuthToolkitDependency
@@ -144,7 +144,7 @@ class TestGetCurrentUser:
 
   @pytest.mark.asyncio
   async def test_get_current_user_invalid_token_raises_403(
-    self, private_key_file, public_key_file
+    self, private_key_file, public_key_file  # noqa: ARG002
   ):
     """
     Given: An invalid JWT token

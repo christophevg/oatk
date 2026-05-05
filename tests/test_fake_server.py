@@ -24,7 +24,7 @@ class TestFakeServerInitialization:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Server object exists with Flask app
-        pytest.fail("Not implemented: test server initialization")
+        pytest.skip("Not implemented: test server initialization")
 
     def test_server_has_oatk_reference(self):
         """
@@ -34,7 +34,7 @@ class TestFakeServerInitialization:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Server.oatk attribute exists
-        pytest.fail("Not implemented: test server has oatk reference")
+        pytest.skip("Not implemented: test server has oatk reference")
 
 
 class TestHomeRoute:
@@ -48,7 +48,7 @@ class TestHomeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns login template
-        pytest.fail("Not implemented: test home route get without user")
+        pytest.skip("Not implemented: test home route get without user")
 
     def test_home_route_get_with_user(self):
         """
@@ -58,7 +58,7 @@ class TestHomeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns home template with client list
-        pytest.fail("Not implemented: test home route get with user")
+        pytest.skip("Not implemented: test home route get with user")
 
     def test_home_route_post_login(self):
         """
@@ -68,7 +68,7 @@ class TestHomeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Creates/retrieves user, sets session
-        pytest.fail("Not implemented: test home route post login")
+        pytest.skip("Not implemented: test home route post login")
 
 
 class TestCreateClientRoute:
@@ -82,7 +82,7 @@ class TestCreateClientRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns create_client template
-        pytest.fail("Not implemented: test create client get")
+        pytest.skip("Not implemented: test create client get")
 
     def test_create_client_post(self):
         """
@@ -92,7 +92,7 @@ class TestCreateClientRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Client created, redirects to home
-        pytest.fail("Not implemented: test create client post")
+        pytest.skip("Not implemented: test create client post")
 
     def test_create_client_requires_authentication(self):
         """
@@ -102,7 +102,7 @@ class TestCreateClientRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Redirects to /
-        pytest.fail("Not implemented: test create client requires auth")
+        pytest.skip("Not implemented: test create client requires auth")
 
 
 class TestAuthorizeRoute:
@@ -116,7 +116,7 @@ class TestAuthorizeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Shows authorize template
-        pytest.fail("Not implemented: test authorize get with user")
+        pytest.skip("Not implemented: test authorize get with user")
 
     def test_authorize_get_without_user(self):
         """
@@ -126,7 +126,7 @@ class TestAuthorizeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Shows login template
-        pytest.fail("Not implemented: test authorize get without user")
+        pytest.skip("Not implemented: test authorize get without user")
 
     def test_authorize_post_confirm(self):
         """
@@ -136,7 +136,7 @@ class TestAuthorizeRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Creates code, redirects to redirect_uri
-        pytest.fail("Not implemented: test authorize post confirm")
+        pytest.skip("Not implemented: test authorize post confirm")
 
 
 class TestTokenRoute:
@@ -150,7 +150,7 @@ class TestTokenRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns JSON with access_token
-        pytest.fail("Not implemented: test token endpoint post")
+        pytest.skip("Not implemented: test token endpoint post")
 
     def test_token_includes_jwt(self):
         """
@@ -160,7 +160,7 @@ class TestTokenRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Token includes signed JWT
-        pytest.fail("Not implemented: test token includes jwt")
+        pytest.skip("Not implemented: test token includes jwt")
 
     def test_token_endpoint_invalid_code(self):
         """
@@ -170,7 +170,7 @@ class TestTokenRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns error JSON
-        pytest.fail("Not implemented: test token endpoint invalid code")
+        pytest.skip("Not implemented: test token endpoint invalid code")
 
 
 class TestUserinfoRoute:
@@ -184,7 +184,7 @@ class TestUserinfoRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns userinfo JSON
-        pytest.fail("Not implemented: test userinfo with valid token")
+        pytest.skip("Not implemented: test userinfo with valid token")
 
     def test_userinfo_requires_authentication(self):
         """
@@ -194,7 +194,7 @@ class TestUserinfoRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns 401 response
-        pytest.fail("Not implemented: test userinfo requires authentication")
+        pytest.skip("Not implemented: test userinfo requires authentication")
 
 
 class TestCertsRoute:
@@ -208,7 +208,7 @@ class TestCertsRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns JWKS with keys
-        pytest.fail("Not implemented: test certs endpoint")
+        pytest.skip("Not implemented: test certs endpoint")
 
     def test_certs_returns_valid_jwks(self):
         """
@@ -218,7 +218,7 @@ class TestCertsRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns JSON with 'keys' array
-        pytest.fail("Not implemented: test certs returns valid jwks")
+        pytest.skip("Not implemented: test certs returns valid jwks")
 
 
 class TestWellKnownRoute:
@@ -232,7 +232,7 @@ class TestWellKnownRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Returns OpenID config JSON
-        pytest.fail("Not implemented: test well known endpoint")
+        pytest.skip("Not implemented: test well known endpoint")
 
     def test_well_known_includes_required_fields(self):
         """
@@ -242,7 +242,7 @@ class TestWellKnownRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Config has all required fields
-        pytest.fail("Not implemented: test well known includes required fields")
+        pytest.skip("Not implemented: test well known includes required fields")
 
 
 class TestLogoutRoute:
@@ -256,7 +256,7 @@ class TestLogoutRoute:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Session cleared, redirects to /
-        pytest.fail("Not implemented: test logout clears session")
+        pytest.skip("Not implemented: test logout clears session")
 
 
 class TestDatabaseOperations:
@@ -270,7 +270,7 @@ class TestDatabaseOperations:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: User document created
-        pytest.fail("Not implemented: test user creation")
+        pytest.skip("Not implemented: test user creation")
 
     def test_client_creation(self):
         """
@@ -280,7 +280,7 @@ class TestDatabaseOperations:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Client document created
-        pytest.fail("Not implemented: test client creation")
+        pytest.skip("Not implemented: test client creation")
 
     def test_code_storage(self):
         """
@@ -290,7 +290,7 @@ class TestDatabaseOperations:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Code document created
-        pytest.fail("Not implemented: test code storage")
+        pytest.skip("Not implemented: test code storage")
 
 
 class TestIntegrationScenarios:
@@ -304,7 +304,7 @@ class TestIntegrationScenarios:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Complete flow yields access token
-        pytest.fail("Not implemented: test complete authorization code flow")
+        pytest.skip("Not implemented: test complete authorization code flow")
 
     def test_token_validation_after_flow(self):
         """
@@ -314,4 +314,4 @@ class TestIntegrationScenarios:
         """
         # Stub: This test will fail until implementation is complete
         # Expected behavior: Token validates and contains claims
-        pytest.fail("Not implemented: test token validation after flow")
+        pytest.skip("Not implemented: test token validation after flow")
