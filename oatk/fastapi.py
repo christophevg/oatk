@@ -25,7 +25,10 @@ Example:
         return {"admin": user}
 """
 
-from typing import Any, Callable, Dict, List, Union
+from __future__ import annotations
+
+from collections.abc import Callable, Coroutine
+from typing import Any, TypeAlias
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -33,7 +36,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from oatk.async_toolkit import AsyncOAuthToolkit
 
 # Type for claim values in require_claims
-ClaimValue = Union[str, List[Any], Callable[[Any], bool]]
+ClaimValue: TypeAlias = str | list[Any] | Callable[[Any], bool]
 
 
 class OAuthToolkitDependency:
@@ -80,9 +83,9 @@ class OAuthToolkitDependency:
 
   async def get_current_user(
     self,
-    request: Request,
+    _request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-  ) -> Dict[str, Any]:
+  ) -> dict[str, Any]:
     """
     FastAPI dependency that validates the token and returns the decoded claims.
 
@@ -120,7 +123,7 @@ class OAuthToolkitDependency:
   def require_claims(
     self,
     **required_claims: ClaimValue,
-  ) -> Callable[..., Dict[str, Any]]:
+  ) -> Callable[..., Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a FastAPI dependency that validates specific claims.
 
@@ -159,9 +162,9 @@ class OAuthToolkitDependency:
             return {"message": "premium access granted"}
     """
     async def dependency(
-      request: Request,
+      _request: Request,
       credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
       token = credentials.credentials
 
       try:

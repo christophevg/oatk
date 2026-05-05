@@ -19,7 +19,7 @@ import jwt
 
 from oatk import fake
 from oatk.async_client import AsyncHttpClient
-from oatk.types import ClaimsDict, Decorator, JWKSDict, RequiredClaims
+from oatk.types import ClaimsDict, ClaimValue, Decorator, JWKSDict, RequiredClaims
 
 logger = logging.getLogger(__name__)
 
@@ -254,12 +254,12 @@ class AsyncOAuthToolkit:
     """
     try:
       # Try to open as a file path (async)
-      async with await anyio.open_file(path_or_string_or_obj) as fp:
+      async with await anyio.open_file(path_or_string_or_obj) as fp:  # type: ignore[arg-type]
         jwks: JWKSDict = json.loads(await fp.read())
     except Exception:
       # If file open fails, try to parse as JSON string/bytes
       try:
-        jwks = json.loads(path_or_string_or_obj)
+        jwks = json.loads(path_or_string_or_obj)  # type: ignore[arg-type]
       except Exception:
         # If that fails, assume it's already a JWKS dict
         jwks = path_or_string_or_obj  # type: ignore
@@ -327,6 +327,7 @@ class AsyncOAuthToolkit:
     """
     if not token:
       token = self._encoded
+    assert token is not None, "No token provided and no token loaded"
     return jwt.get_unverified_header(token)
 
   def claims(
@@ -390,11 +391,12 @@ class AsyncOAuthToolkit:
         This method uses run_in_executor for CPU-bound JWT validation
         to avoid blocking the async event loop.
     """
-    kid = self.header(token)["kid"]
-    alg = self.header(token)["alg"]
-
     if not token:
       token = self._encoded
+    assert token is not None, "No token provided and no token loaded"
+
+    kid = self.header(token)["kid"]
+    alg = self.header(token)["alg"]
 
     try:
       cert = self._certs[kid]
@@ -430,6 +432,7 @@ class AsyncOAuthToolkit:
     """
     if not token:
       token = self._encoded
+    assert token is not None, "No token provided and no token loaded"
     return jwt.decode(token, options={"verify_signature": False})
 
   async def execute_authenticated(
@@ -542,7 +545,7 @@ class AsyncOAuthToolkit:
     return wrapper
 
   def authenticated_with_claims(
-    self, **required_claims: str | Callable[[Any], bool]
+    self, **required_claims: ClaimValue
   ) -> Decorator:
     """
     Decorator factory for authenticating async routes with required claims.

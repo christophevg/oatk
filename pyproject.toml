@@ -15,14 +15,12 @@ keywords = ["oauth", "human"]
 classifiers = [
   "Topic :: Security :: Cryptography",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
   "Development Status :: 4 - Beta",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
   "pyjwt",
   "cryptography",
@@ -81,7 +79,7 @@ path = "oatk/__init__.py"
 pattern = "__version__ = ['\"](?P<version>[^'\"]+)['\"]"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 
 [tool.ruff.lint]
@@ -105,7 +103,7 @@ ignore = [
 known-first-party = ["oatk"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
