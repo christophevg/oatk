@@ -36,10 +36,6 @@
 
 
 
-- [ ] **1.9 Create CHANGELOG.md**
-  - Initialize with existing version history (0.1.5)
-  - Document format: [Unreleased], [0.2.0], etc.
-  - Add placeholder for Phase 1 completion
   - Follow Keep a Changelog format
 
 - [ ] **1.10 Remove .pypi-template dependency**
