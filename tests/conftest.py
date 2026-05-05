@@ -133,7 +133,8 @@ def jwks_dict(rsa_key_pair):
     public_key = rsa_key_pair["public_key_obj"]
 
     # Convert public key to JWK format
-    jwk_dict = json.loads(jwk.dumps(public_key, kty="RSA", alg="RS256", kid=kid))
+    # jwk.dumps returns a dict, not a JSON string
+    jwk_dict = jwk.dumps(public_key, kty="RSA", alg="RS256", kid=kid)
 
     return {
         "keys": [jwk_dict]

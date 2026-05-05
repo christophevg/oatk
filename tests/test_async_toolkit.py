@@ -89,7 +89,8 @@ class TestAsyncOAuthToolkitKeyLoading:
     Then: Should load both keys
     """
     toolkit = AsyncOAuthToolkit()
-    await toolkit.with_private(str(private_key_file)).with_public(str(public_key_file))
+    await toolkit.with_private(str(private_key_file))
+    await toolkit.with_public(str(public_key_file))
 
     assert toolkit._private_key is not None, "Should load private key"
     assert toolkit._public_key is not None, "Should load public key"
@@ -350,6 +351,7 @@ class TestAsyncOAuthToolkitValidation:
     await toolkit.with_private(str(private_key_file))
     await toolkit.with_public(str(public_key_file))
     toolkit.claims(**sample_claims)
+    toolkit.with_client_id(sample_claims.get("aud"))  # Set audience for validation
 
     token = toolkit.token
     validated = await toolkit.validate(token)
@@ -358,13 +360,15 @@ class TestAsyncOAuthToolkitValidation:
     assert validated["iss"] == sample_claims["iss"]
 
   @pytest.mark.asyncio
-  async def test_validate_token_with_jwks(self, jwks_dict, rsa_key_pair, sample_claims):
+  async def test_validate_token_with_jwks(self, rsa_key_pair, sample_claims):
     """
     Given: An AsyncOAuthToolkit with JWKS and a valid token
     When: Calling validate() asynchronously
     Then: Should validate using JWKS keys
     """
     from oatk import OAuthToolkit
+    from authlib.jose import jwk
+    import uuid
 
     # Create a token with the sync toolkit using the key pair
     sync_toolkit = OAuthToolkit()
@@ -373,12 +377,25 @@ class TestAsyncOAuthToolkitValidation:
       private_key_path = f.name
 
     sync_toolkit.with_private(private_key_path)
+
+    # Get the kid from the sync toolkit (it generates one automatically)
+    kid = sync_toolkit._kid
+
     sync_toolkit.claims(**sample_claims)
+    sync_toolkit.with_client_id(sample_claims.get("aud"))  # Set audience
     token = sync_toolkit.token
+
+    # Create JWKS with the same kid
+    jwks_dict = {
+      "keys": [
+        jwk.dumps(rsa_key_pair["public_key_obj"], kty="RSA", alg="RS256", kid=kid)
+      ]
+    }
 
     # Validate with async toolkit using JWKS
     async_toolkit = AsyncOAuthToolkit()
     await async_toolkit.with_jwks(jwks_dict)
+    async_toolkit.with_client_id(sample_claims.get("aud"))  # Set audience for validation
 
     validated = await async_toolkit.validate(token)
 
@@ -466,8 +483,10 @@ class TestAsyncOAuthToolkitDecode:
     When: Calling decode() without argument
     Then: Should decode the loaded token
     """
+    # Create a valid test token (header.payload.signature)
+    # Using a valid base64 signature
     toolkit = AsyncOAuthToolkit()
-    toolkit._encoded = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.signature"
+    toolkit._encoded = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
     decoded = toolkit.decode()
 
@@ -486,13 +505,10 @@ class TestAsyncOAuthToolkitMethodChaining:
     """
     toolkit = AsyncOAuthToolkit()
 
-    result = await (
-      toolkit
-      .with_private(str(private_key_file))
-      .with_public(str(public_key_file))
-      .claims(**sample_claims)
-      .with_client_id("test-client-id")
-    )
+    await toolkit.with_private(str(private_key_file))
+    await toolkit.with_public(str(public_key_file))
+    toolkit.claims(**sample_claims)
+    result = toolkit.with_client_id("test-client-id")
 
     assert result is toolkit, "Should return self after chaining"
     assert toolkit._private_key is not None
