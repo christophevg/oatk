@@ -14,7 +14,7 @@ import asyncio
 import time
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -457,7 +457,7 @@ class TestFastAPIIntegration:
 
     # Test without token
     response = client.get("/protected")
-    assert response.status_code == 403  # Missing authorization
+    assert response.status_code == 401  # Missing authorization (not authenticated)
 
     # Test with valid token
     response = client.get(

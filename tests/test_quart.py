@@ -41,7 +41,7 @@ class TestQuartAuthenticated:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated(toolkit)
       async def protected_route():
         return {"message": "authenticated"}
@@ -72,7 +72,7 @@ class TestQuartAuthenticated:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=None)
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated(toolkit)
       async def protected_route():
         return {"message": "should not reach here"}
@@ -102,7 +102,7 @@ class TestQuartAuthenticated:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value="Bearer invalid-token")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated(toolkit)
       async def protected_route():
         return {"message": "should not reach here"}
@@ -165,7 +165,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated_with_claims(toolkit, sub=sample_claims["sub"])
       async def protected_route():
         return {"message": "authenticated"}
@@ -200,7 +200,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated_with_claims(toolkit, missing_claim="value")
       async def protected_route():
         return {"message": "should not reach here"}
@@ -237,7 +237,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated_with_claims(toolkit, sub="wrong-user")
       async def protected_route():
         return {"message": "should not reach here"}
@@ -272,7 +272,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated_with_claims(
         toolkit,
         sub=lambda x: x.startswith("test-user")
@@ -334,7 +334,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
-    with patch("oatk.quart.request", mock_request):
+    with patch("quart.request", mock_request):
       @quart_authenticated_with_claims(
         toolkit,
         sub=sample_claims["sub"],
