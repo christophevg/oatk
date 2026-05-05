@@ -53,6 +53,16 @@ async = [
   "httpx",
   "anyio",
 ]
+quart = [
+  "quart",
+  "httpx",
+  "anyio",
+]
+fastapi = [
+  "fastapi",
+  "httpx",
+  "anyio",
+]
 
 [project.urls]
 Homepage = "https://github.com/christophevg/oatk"
@@ -114,6 +124,8 @@ module = [
   "requests.*",
   "fire",
   "AppKit",
+  "quart.*",
+  "fastapi.*",
 ]
 ignore_missing_imports = true
 
