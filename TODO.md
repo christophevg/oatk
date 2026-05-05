@@ -41,14 +41,6 @@
   - Create `oatk/types.py` for custom type definitions if needed
   - Ensure mypy passes without errors
 
-- [ ] **1.8 Update Makefile for uv workflow**
-  - Replace pyenv-based env creation with uv
-  - Update `install` target to use `uv sync`
-  - Update `test` target to use `uv run pytest`
-  - Update `lint` target to use `uv run ruff`
-  - Update `docs` target if applicable
-  - Add `uv lock` to dependency update targets
-  - Keep Python version management with pyenv
 
 - [ ] **1.9 Create CHANGELOG.md**
   - Initialize with existing version history (0.1.5)
@@ -251,3 +243,12 @@
   - Created test_fake_server.py with 31 stub tests
   - Pytest configuration already in pyproject.toml
   - Verified: Tests run successfully, majority pass
+
+**Note:** Task 1.6 (Configure mypy) was completed as part of Task 1.1.
+
+- [x] **1.8 Update Makefile for uv workflow**
+  - Replaced pyenv-based env creation with uv (done in Task 1.3)
+  - Updated install target to use uv sync
+  - Updated test target to use uv run pytest
+  - Updated lint target to use uv run ruff
+  - Kept pyenv for Python version management
