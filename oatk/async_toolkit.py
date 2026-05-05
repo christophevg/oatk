@@ -5,12 +5,14 @@ This module provides an async version of OAuthToolkit that uses async operations
 for HTTP and file I/O while maintaining the same fluent API pattern.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import uuid
-from contextvars import ContextVar
+from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import Any
 
 import anyio
 import jwt
@@ -21,16 +23,13 @@ from oatk.types import ClaimsDict, Decorator, JWKSDict, RequiredClaims
 
 logger = logging.getLogger(__name__)
 
-# Context variable for storing authorization token in async context
-_authorization_token: ContextVar[Optional[str]] = ContextVar('authorization_token', default=None)
-
-if TYPE_CHECKING:
-  from AppKit import NSPasteboard
+# if TYPE_CHECKING:
+#   from AppKit import NSPasteboard
 
 try:
   from AppKit import NSPasteboard, NSStringPboardType
 
-  pb: Optional["NSPasteboard"] = NSPasteboard.generalPasteboard()
+  pb: NSPasteboard | None = NSPasteboard.generalPasteboard()
 except ModuleNotFoundError:
   logger.debug("No AppKit installed, so no MacOS clipboard support!")
   pb = None
@@ -69,15 +68,15 @@ class AsyncOAuthToolkit:
 
   def __init__(self) -> None:
     """Initialize an AsyncOAuthToolkit instance with default values."""
-    self._encoded: Optional[str] = None
-    self._provider_url: Optional[str] = None
-    self._certs: Dict[str, Any] = {}
-    self._private_key: Optional[Any] = None
-    self._public_key: Optional[Any] = None
+    self._encoded: str | None = None
+    self._provider_url: str | None = None
+    self._certs: dict[str, Any] = {}
+    self._private_key: Any | None = None
+    self._public_key: Any | None = None
     self._alg: str = "RS256"
     self._kid: str = str(uuid.uuid4())
     self._claims: ClaimsDict = {}
-    self._client_id: Optional[str] = None
+    self._client_id: str | None = None
 
     self.server = fake.server
     self.server.oatk = self
@@ -92,7 +91,7 @@ class AsyncOAuthToolkit:
     logger.info(msg)
     logger.info(json.dumps(list(self._certs.keys()), indent=2, default=str))
 
-  async def with_private(self, path: str) -> "AsyncOAuthToolkit":
+  async def with_private(self, path: str) -> AsyncOAuthToolkit:
     """
     Load a private key from a PEM file asynchronously.
 
@@ -117,7 +116,7 @@ class AsyncOAuthToolkit:
     )
     return self
 
-  async def with_public(self, path: str) -> "AsyncOAuthToolkit":
+  async def with_public(self, path: str) -> AsyncOAuthToolkit:
     """
     Load a public key from a PEM file asynchronously.
 
@@ -140,7 +139,7 @@ class AsyncOAuthToolkit:
     self._log_certs("certs set from path to")
     return self
 
-  async def using_provider(self, provider_url: str) -> Optional["AsyncOAuthToolkit"]:
+  async def using_provider(self, provider_url: str) -> AsyncOAuthToolkit | None:
     """
     Configure the toolkit from an OAuth provider's discovery endpoint.
 
@@ -162,7 +161,7 @@ class AsyncOAuthToolkit:
     self._provider_url = provider_url
     return await self.init_from_provider()
 
-  async def init_from_provider(self) -> Optional["AsyncOAuthToolkit"]:
+  async def init_from_provider(self) -> AsyncOAuthToolkit | None:
     """
     Initialize the toolkit from the configured provider URL.
 
@@ -200,7 +199,7 @@ class AsyncOAuthToolkit:
     logger.info(f"successfully configured from {self._provider_url}")
     return self
 
-  def with_client_id(self, client_id: str) -> "AsyncOAuthToolkit":
+  def with_client_id(self, client_id: str) -> AsyncOAuthToolkit:
     """
     Set the OAuth client ID for audience validation.
 
@@ -233,8 +232,8 @@ class AsyncOAuthToolkit:
     )
 
   async def with_jwks(
-    self, path_or_string_or_obj: Union[str, bytes, JWKSDict]
-  ) -> "AsyncOAuthToolkit":
+    self, path_or_string_or_obj: str | bytes | JWKSDict
+  ) -> AsyncOAuthToolkit:
     """
     Load JWKS from a file path, JSON string, or dictionary.
 
@@ -276,7 +275,7 @@ class AsyncOAuthToolkit:
       self._kid = jwks["keys"][0]["kid"]
     return self
 
-  def from_clipboard(self) -> "AsyncOAuthToolkit":
+  def from_clipboard(self) -> AsyncOAuthToolkit:
     """
     Load a token from the system clipboard (macOS only).
 
@@ -299,7 +298,7 @@ class AsyncOAuthToolkit:
     self._encoded = encoded.strip()  # strip to remove trailing newline
     return self
 
-  async def from_file(self, path: str) -> "AsyncOAuthToolkit":
+  async def from_file(self, path: str) -> AsyncOAuthToolkit:
     """
     Load a token from a file asynchronously.
 
@@ -313,7 +312,7 @@ class AsyncOAuthToolkit:
       self._encoded = (await fp.read()).strip()  # strip to remove trailing newline
     return self
 
-  def header(self, token: Optional[str] = None) -> Dict[str, Any]:
+  def header(self, token: str | None = None) -> dict[str, Any]:
     """
     Get the header of a JWT token without validating it.
 
@@ -331,8 +330,8 @@ class AsyncOAuthToolkit:
     return jwt.get_unverified_header(token)
 
   def claims(
-    self, claimsdict: Optional[ClaimsDict] = None, **claimset: Any
-  ) -> "AsyncOAuthToolkit":
+    self, claimsdict: ClaimsDict | None = None, **claimset: Any
+  ) -> AsyncOAuthToolkit:
     """
     Set claims for token generation.
 
@@ -350,7 +349,7 @@ class AsyncOAuthToolkit:
     return self
 
   @property
-  def token(self) -> Optional[str]:
+  def token(self) -> str | None:
     """
     Generate a JWT token from the configured private key and claims.
 
@@ -369,7 +368,7 @@ class AsyncOAuthToolkit:
       )
     return None
 
-  async def validate(self, token: Optional[str] = None) -> Dict[str, Any]:
+  async def validate(self, token: str | None = None) -> dict[str, Any]:
     """
     Validate a JWT token asynchronously.
 
@@ -415,7 +414,7 @@ class AsyncOAuthToolkit:
       lambda: jwt.decode(token, cert, algorithms=[alg], audience=self._client_id)
     )
 
-  def decode(self, token: Optional[str] = None) -> Dict[str, Any]:
+  def decode(self, token: str | None = None) -> dict[str, Any]:
     """
     Decode a JWT token without validating the signature.
 
@@ -436,7 +435,7 @@ class AsyncOAuthToolkit:
   async def execute_authenticated(
     self,
     f: Callable[..., Any],
-    required_claims: Optional[RequiredClaims] = None,
+    required_claims: RequiredClaims | None = None,
     *args: Any,
     **kwargs: Any,
   ) -> Any:
@@ -444,7 +443,7 @@ class AsyncOAuthToolkit:
     Execute a function after authenticating a request.
 
     This is designed for use with async web frameworks (Quart, FastAPI, etc.)
-    that provide request context.
+    that provide request context via thread-local or context variables.
 
     Args:
         f: The function to execute after authentication
@@ -454,18 +453,17 @@ class AsyncOAuthToolkit:
 
     Returns:
         The result of f(*args, **kwargs) if authenticated, or an error response
-
-    Note:
-        This method requires the authorization token to be available via
-        get_authorization_token(). Use set_authorization_token() before calling
-        or pass the token in the request context.
     """
-    # Get authorization token from context
-    token = self.get_authorization_token()
+    # Import request from quart (async Flask-compatible framework)
+    from quart import request
 
-    if token is None:
+    # Check for Authorization header
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
       return self._create_error_response("Missing Authorization", 401)
 
+    # Extract token from "Bearer <token>" format
+    token = auth_header[7:]
     code = 403
     msg = ""
 
@@ -519,60 +517,12 @@ class AsyncOAuthToolkit:
     """
     return (message, status_code)
 
-  @staticmethod
-  def set_authorization_token(token: Optional[str]) -> None:
-    """
-    Set the authorization token in the current async context.
-
-    This method should be called before execute_authenticated() to provide
-    the authorization token. It uses contextvars for thread-safe async context.
-
-    Args:
-        token: The JWT token string (without 'Bearer ' prefix)
-
-    Example:
-        toolkit.set_authorization_token(request.headers.get('Authorization')[7:])
-        result = await toolkit.execute_authenticated(my_function, None)
-    """
-    _authorization_token.set(token)
-
-  @staticmethod
-  def get_authorization_token() -> Optional[str]:
-    """
-    Get the authorization token from the current async context.
-
-    Returns:
-        The JWT token string or None if not set
-    """
-    return _authorization_token.get()
-
-  @staticmethod
-  def extract_token_from_header(auth_header: Optional[str]) -> Optional[str]:
-    """
-    Extract the JWT token from an Authorization header value.
-
-    Args:
-        auth_header: The Authorization header value (e.g., "Bearer <token>")
-
-    Returns:
-        The JWT token string or None if not found
-    """
-    if not auth_header:
-      return None
-    if auth_header.startswith("Bearer "):
-      return auth_header[7:]
-    return None
-
   def authenticated(self, f: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator for authenticating async routes.
 
     This decorator validates the Authorization header and executes the
     decorated function only if authentication succeeds.
-
-    IMPORTANT: Before the decorated function executes, you must set the
-    authorization token in the context using set_authorization_token() or
-    by using framework-specific middleware that extracts the token.
 
     Args:
         f: The async function to decorate
@@ -581,26 +531,8 @@ class AsyncOAuthToolkit:
         Decorated function that validates authentication
 
     Example:
-        # Framework-agnostic approach with manual token setting
         @toolkit.authenticated
         async def protected_route():
-            return {"message": "authenticated"}
-
-        # In your middleware or before calling:
-        toolkit.set_authorization_token(extract_token_from_request(request))
-        result = await protected_route()
-
-        # Quart example (automatic extraction):
-        from quart import request
-
-        @app.route("/protected")
-        @toolkit.authenticated
-        async def protected():
-            toolkit.set_authorization_token(
-                toolkit.extract_token_from_header(
-                    request.headers.get("Authorization")
-                )
-            )
             return {"message": "authenticated"}
     """
     @wraps(f)
@@ -610,14 +542,10 @@ class AsyncOAuthToolkit:
     return wrapper
 
   def authenticated_with_claims(
-    self, **required_claims: Union[str, Callable[[Any], bool]]
+    self, **required_claims: str | Callable[[Any], bool]
   ) -> Decorator:
     """
     Decorator factory for authenticating async routes with required claims.
-
-    IMPORTANT: Before the decorated function executes, you must set the
-    authorization token in the context using set_authorization_token() or
-    by using framework-specific middleware that extracts the token.
 
     Args:
         **required_claims: Required claims as keyword arguments.

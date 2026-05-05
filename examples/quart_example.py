@@ -3,8 +3,8 @@ Example usage of oatk with Quart framework.
 
 This example demonstrates:
 1. Setting up AsyncOAuthToolkit with a provider
-2. Using @quart_authenticated decorator
-3. Using @quart_authenticated_with_claims decorator
+2. Using @toolkit.authenticated decorator
+3. Using @toolkit.authenticated_with_claims decorator
 4. Token generation for testing
 
 To run this example:
@@ -16,7 +16,6 @@ import asyncio
 import time
 
 from oatk.async_toolkit import AsyncOAuthToolkit
-from oatk.quart import quart_authenticated, quart_authenticated_with_claims
 
 
 async def create_test_keys():
@@ -48,7 +47,7 @@ async def create_test_keys():
   return private_pem, public_pem
 
 
-def create_quart_app(toolkit: AsyncOAuthToolkit) -> "Quart":
+def create_quart_app(toolkit: AsyncOAuthToolkit) -> "Quart":  # noqa: F821
   """
   Create a Quart application with protected routes.
 
@@ -67,23 +66,22 @@ def create_quart_app(toolkit: AsyncOAuthToolkit) -> "Quart":
     return jsonify({"message": "Welcome to the API"})
 
   @app.route("/protected")
-  @quart_authenticated(toolkit)
+  @toolkit.authenticated
   async def protected():
     return jsonify({"message": "This is a protected route"})
 
   @app.route("/admin")
-  @quart_authenticated_with_claims(toolkit, role="admin")
+  @toolkit.authenticated_with_claims(role="admin")
   async def admin():
     return jsonify({"message": "Admin access granted"})
 
   @app.route("/user")
-  @quart_authenticated_with_claims(toolkit, sub="test-user-123")
+  @toolkit.authenticated_with_claims(sub="test-user-123")
   async def user_route():
     return jsonify({"message": "Specific user access granted"})
 
   @app.route("/validator")
-  @quart_authenticated_with_claims(
-    toolkit,
+  @toolkit.authenticated_with_claims(
     exp=lambda exp: exp > time.time()
   )
   async def validator_route():
@@ -155,7 +153,7 @@ async def main():
 
     # Test with httpx async client
     try:
-      import httpx
+      import httpx  # noqa: F401
     except ImportError:
       print("httpx not installed. Install with: uv pip install httpx")
       print("\nExample code structure:")
@@ -164,7 +162,7 @@ async def main():
       print("  await toolkit.with_public('public_key.pem')")
       print()
       print("  @app.route('/protected')")
-      print("  @quart_authenticated(toolkit)")
+      print("  @toolkit.authenticated")
       print("  async def protected():")
       print("      return {'message': 'authenticated'}")
       return

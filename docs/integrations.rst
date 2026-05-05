@@ -152,7 +152,7 @@ Quart (Asynchronous)
 --------------------
 
 Quart is an async Flask-compatible framework. oatk provides async
-decorators with automatic token extraction.
+decorators that work exactly like the Flask version.
 
 Installation
 ~~~~~~~~~~~~
@@ -168,7 +168,6 @@ Basic Setup
 
    from quart import Quart
    from oatk import AsyncOAuthToolkit
-   from oatk.quart import quart_authenticated
 
    app = Quart(__name__)
    toolkit = AsyncOAuthToolkit()
@@ -180,50 +179,44 @@ Basic Setup
        )
 
    @app.route("/protected")
-   @quart_authenticated(toolkit)
+   @toolkit.authenticated
    async def protected():
        return {"message": "authenticated"}
 
 Authentication Decorators
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**quart_authenticated**
+**@toolkit.authenticated**
 
 Require valid token (automatic extraction):
 
 .. code-block:: python
 
-   from oatk.quart import quart_authenticated
-
    @app.route("/protected")
-   @quart_authenticated(toolkit)
+   @toolkit.authenticated
    async def protected():
        return {"message": "authenticated"}
 
 The decorator:
 
 1. Extracts token from ``request.headers["Authorization"]``
-2. Sets token in context
-3. Validates token
-4. Returns 401/403 on error
-5. Calls route handler on success
+2. Validates token
+3. Returns 401/403 on error
+4. Calls route handler on success
 
-**quart_authenticated_with_claims**
+**@toolkit.authenticated_with_claims**
 
 Require specific claims:
 
 .. code-block:: python
 
-   from oatk.quart import quart_authenticated_with_claims
-
    @app.route("/admin")
-   @quart_authenticated_with_claims(toolkit, role="admin")
+   @toolkit.authenticated_with_claims(role="admin")
    async def admin():
        return {"message": "admin only"}
 
    @app.route("/manager")
-   @quart_authenticated_with_claims(
-       toolkit,
+   @toolkit.authenticated_with_claims(
        role="manager",
        department="engineering"
    )
@@ -238,11 +231,10 @@ Accessing Claims
    from quart import request
 
    @app.route("/profile")
-   @quart_authenticated(toolkit)
+   @toolkit.authenticated
    async def profile():
-       token = toolkit.extract_token_from_header(
-           request.headers.get("Authorization")
-       )
+       # Extract token from request
+       token = request.headers["Authorization"][7:]
        claims = toolkit.decode(token)
        return {"user": claims["sub"]}
 
@@ -475,7 +467,7 @@ The toolkit API is consistent across frameworks:
    await toolkit.with_jwks("certs.json")
 
    @app.route("/protected")
-   @quart_authenticated(toolkit)
+   @toolkit.authenticated
    async def protected():
        return {"message": "authenticated"}
 

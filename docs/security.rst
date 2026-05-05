@@ -182,35 +182,6 @@ Flask decorators use global ``request`` object:
 - Safe for standard Flask deployment
 - Be careful with async Flask extensions
 
-Async Token Management
-~~~~~~~~~~~~~~~~~~~~~~
-
-AsyncOAuthToolkit uses ContextVar for token management:
-
-.. code-block:: python
-
-   # Tokens are stored in async context
-   toolkit.set_authorization_token(token)
-
-**Considerations:**
-
-- Each async task has its own context
-- Context is not shared between tasks
-- Must set token before each operation
-
-.. code-block:: python
-
-   # WRONG - token not set
-   @toolkit.authenticated
-   async def protected():
-       return "ok"
-
-   result = await protected()  # Returns 401
-
-   # CORRECT - set token first
-   toolkit.set_authorization_token(token)
-   result = await protected()
-
 Clock Skew
 ~~~~~~~~~
 

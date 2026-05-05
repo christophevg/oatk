@@ -22,8 +22,7 @@ The async API differs from the sync API in important ways:
 1. **Async HTTP**: Uses ``httpx`` instead of ``requests``
 2. **Async file I/O**: Uses ``anyio`` for non-blocking file operations
 3. **Async provider init**: ``using_provider()`` and ``init_from_provider()`` are async
-4. **Context-based auth**: Uses ``ContextVar`` for token management
-5. **Framework-agnostic**: Decorators work with any async framework
+4. **Framework integration**: Decorators work with Quart and FastAPI
 
 Configuration Methods
 ---------------------
@@ -199,37 +198,8 @@ Export public key as JWKS (synchronous):
    async with await anyio.open_file("certs.json", "w") as f:
        await f.write(jwks)
 
-Context-Based Authentication
------------------------------
-
-The async API uses Python's ``ContextVar`` for managing tokens across
-async contexts.
-
-Setting the Token
-~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   # Set token in current context
-   AsyncOAuthToolkit.set_authorization_token(token)
-
-   # Or extract from header
-   token = toolkit.extract_token_from_header(auth_header)
-   toolkit.set_authorization_token(token)
-
-Getting the Token
-~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   # Get token from current context
-   token = AsyncOAuthToolkit.get_authorization_token()
-
-   if token:
-       claims = await toolkit.validate(token)
-
 Framework-Agnostic Decorators
-------------------------------
+-----------------------------
 
 The async API provides decorators that work with any async framework.
 
@@ -246,14 +216,6 @@ Basic Authentication
    @toolkit.authenticated
    async def protected_route():
        return {"message": "authenticated"}
-
-**Important:** You must set the token before calling the decorated function:
-
-.. code-block:: python
-
-   # In your framework's middleware or before calling:
-   toolkit.set_authorization_token(token)
-   result = await protected_route()
 
 Claims-Based Authorization
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -288,37 +250,34 @@ Require specific claims:
 How Decorators Work
 ~~~~~~~~~~~~~~~~~~~
 
-The decorators use ``execute_authenticated()``:
+The decorators use ``execute_authenticated()`` which extracts the token
+from the request context automatically:
 
 .. code-block:: python
 
    async def protected_route():
        return {"message": "success"}
 
-   # Manual authentication
-   toolkit.set_authorization_token(token)
+   # Manual authentication with custom claims
    result = await toolkit.execute_authenticated(
        protected_route,
        required_claims={"role": "admin"}
    )
 
-**With framework integration:**
+**Framework integration:**
 
-The decorators are framework-agnostic. Framework-specific integrations
-(Quart, FastAPI) wrap these with automatic token extraction.
-
-See :doc:`integrations` for framework-specific decorators.
+The decorators automatically extract tokens from the request context.
+See :doc:`integrations` for framework-specific details.
 
 Async with Quart
 ----------------
 
-Use the Quart integration for automatic token extraction:
+Use the Quart integration with toolkit decorators:
 
 .. code-block:: python
 
    from quart import Quart
    from oatk import AsyncOAuthToolkit
-   from oatk.quart import quart_authenticated
 
    app = Quart(__name__)
    toolkit = AsyncOAuthToolkit()
@@ -328,7 +287,7 @@ Use the Quart integration for automatic token extraction:
        await toolkit.using_provider("https://...")
 
    @app.route("/protected")
-   @quart_authenticated(toolkit)
+   @toolkit.authenticated
    async def protected():
        return {"message": "authenticated"}
 
@@ -403,16 +362,6 @@ Complete Async Example
        # Decode without validation
        decoded = toolkit.decode(token)
        print(f"Decoded claims: {decoded}")
-
-       # Use with context
-       toolkit.set_authorization_token(token)
-
-       @toolkit.authenticated
-       async def protected():
-           return {"message": "authenticated"}
-
-       result = await protected()
-       print(f"Protected result: {result}")
 
    asyncio.run(main())
 

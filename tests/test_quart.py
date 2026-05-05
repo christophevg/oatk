@@ -2,8 +2,8 @@
 Test suite for Quart integration.
 
 Tests verify:
-- quart_authenticated decorator
-- quart_authenticated_with_claims decorator
+- @toolkit.authenticated decorator
+- @toolkit.authenticated_with_claims decorator
 - Token extraction from Quart request context
 - Error handling for missing/invalid tokens
 - Claims validation
@@ -13,19 +13,18 @@ import pytest
 
 
 class TestQuartAuthenticated:
-  """Test quart_authenticated decorator."""
+  """Test authenticated decorator with Quart."""
 
   @pytest.mark.asyncio
   async def test_quart_authenticated_with_valid_token(
     self, private_key_file, public_key_file, sample_claims
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated
+    Given: A Quart route decorated with @toolkit.authenticated
     When: Request includes valid Authorization header
     Then: Route function should execute and return response
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -36,13 +35,13 @@ class TestQuartAuthenticated:
     token = toolkit.token
 
     # Create a mock Quart request context
-    from unittest.mock import AsyncMock, MagicMock, patch
+    from unittest.mock import MagicMock, patch
 
     mock_request = MagicMock()
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated(toolkit)
+      @toolkit.authenticated
       async def protected_route():
         return {"message": "authenticated"}
 
@@ -55,12 +54,11 @@ class TestQuartAuthenticated:
     self, private_key_file, public_key_file
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated
+    Given: A Quart route decorated with @toolkit.authenticated
     When: Request missing Authorization header
     Then: Should return 401 error response
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -73,7 +71,7 @@ class TestQuartAuthenticated:
     mock_request.headers.get = MagicMock(return_value=None)
 
     with patch("quart.request", mock_request):
-      @quart_authenticated(toolkit)
+      @toolkit.authenticated
       async def protected_route():
         return {"message": "should not reach here"}
 
@@ -86,12 +84,11 @@ class TestQuartAuthenticated:
     self, public_key_file
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated
+    Given: A Quart route decorated with @toolkit.authenticated
     When: Request includes invalid token
     Then: Should return 403 error response
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_public(str(public_key_file))
@@ -103,7 +100,7 @@ class TestQuartAuthenticated:
     mock_request.headers.get = MagicMock(return_value="Bearer invalid-token")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated(toolkit)
+      @toolkit.authenticated
       async def protected_route():
         return {"message": "should not reach here"}
 
@@ -116,18 +113,17 @@ class TestQuartAuthenticated:
     self, private_key_file, public_key_file
   ):
     """
-    Given: A function decorated with @quart_authenticated
+    Given: A function decorated with @toolkit.authenticated
     When: Checking function metadata
     Then: Original function name and docstring preserved
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
     await toolkit.with_public(str(public_key_file))
 
-    @quart_authenticated(toolkit)
+    @toolkit.authenticated
     async def my_protected_route():
       """This is a protected route."""
       return {"message": "ok"}
@@ -137,19 +133,18 @@ class TestQuartAuthenticated:
 
 
 class TestQuartAuthenticatedWithClaims:
-  """Test quart_authenticated_with_claims decorator."""
+  """Test authenticated_with_claims decorator with Quart."""
 
   @pytest.mark.asyncio
   async def test_quart_authenticated_with_claims_matching_claims(
     self, private_key_file, public_key_file, sample_claims
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated_with_claims
+    Given: A Quart route decorated with @toolkit.authenticated_with_claims
     When: Token has all required claims with matching values
     Then: Route function should execute
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -166,7 +161,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated_with_claims(toolkit, sub=sample_claims["sub"])
+      @toolkit.authenticated_with_claims(sub=sample_claims["sub"])
       async def protected_route():
         return {"message": "authenticated"}
 
@@ -179,12 +174,11 @@ class TestQuartAuthenticatedWithClaims:
     self, private_key_file, public_key_file, sample_claims
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated_with_claims
+    Given: A Quart route decorated with @toolkit.authenticated_with_claims
     When: Token missing required claim
     Then: Should return 403 error
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -201,7 +195,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated_with_claims(toolkit, missing_claim="value")
+      @toolkit.authenticated_with_claims(missing_claim="value")
       async def protected_route():
         return {"message": "should not reach here"}
 
@@ -216,12 +210,11 @@ class TestQuartAuthenticatedWithClaims:
     self, private_key_file, public_key_file, sample_claims
   ):
     """
-    Given: A Quart route decorated with @quart_authenticated_with_claims
+    Given: A Quart route decorated with @toolkit.authenticated_with_claims
     When: Token has claim with wrong value
     Then: Should return 403 error
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -238,7 +231,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated_with_claims(toolkit, sub="wrong-user")
+      @toolkit.authenticated_with_claims(sub="wrong-user")
       async def protected_route():
         return {"message": "should not reach here"}
 
@@ -256,7 +249,6 @@ class TestQuartAuthenticatedWithClaims:
     Then: Route function should execute
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -273,8 +265,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated_with_claims(
-        toolkit,
+      @toolkit.authenticated_with_claims(
         sub=lambda x: x.startswith("test-user")
       )
       async def protected_route():
@@ -289,18 +280,17 @@ class TestQuartAuthenticatedWithClaims:
     self, private_key_file, public_key_file
   ):
     """
-    Given: A function decorated with @quart_authenticated_with_claims
+    Given: A function decorated with @toolkit.authenticated_with_claims
     When: Checking function metadata
     Then: Original function name and docstring preserved
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
     await toolkit.with_public(str(public_key_file))
 
-    @quart_authenticated_with_claims(toolkit, role="admin")
+    @toolkit.authenticated_with_claims(role="admin")
     async def admin_route():
       """Admin only route."""
       return {"message": "admin"}
@@ -318,7 +308,6 @@ class TestQuartAuthenticatedWithClaims:
     Then: Route function should execute
     """
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated_with_claims
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -335,8 +324,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @quart_authenticated_with_claims(
-        toolkit,
+      @toolkit.authenticated_with_claims(
         sub=sample_claims["sub"],
         iss=sample_claims["iss"]
       )
@@ -365,7 +353,6 @@ class TestQuartIntegration:
     from quart import Quart, jsonify
 
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated, quart_authenticated_with_claims
 
     # Configure toolkit
     toolkit = AsyncOAuthToolkit()
@@ -380,12 +367,12 @@ class TestQuartIntegration:
     app = Quart(__name__)
 
     @app.route("/protected")
-    @quart_authenticated(toolkit)
+    @toolkit.authenticated
     async def protected():
       return jsonify({"message": "authenticated"})
 
     @app.route("/admin")
-    @quart_authenticated_with_claims(toolkit, sub=sample_claims["sub"])
+    @toolkit.authenticated_with_claims(sub=sample_claims["sub"])
     async def admin():
       return jsonify({"message": "admin access"})
 
@@ -427,7 +414,6 @@ class TestQuartIntegration:
     from quart import Quart, jsonify
 
     from oatk.async_toolkit import AsyncOAuthToolkit
-    from oatk.quart import quart_authenticated
 
     toolkit = AsyncOAuthToolkit()
     await toolkit.with_private(str(private_key_file))
@@ -441,7 +427,7 @@ class TestQuartIntegration:
 
     # Route decorator should be closest to function
     @app.route("/protected")
-    @quart_authenticated(toolkit)
+    @toolkit.authenticated
     async def protected():
       return jsonify({"message": "ok"})
 
