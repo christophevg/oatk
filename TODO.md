@@ -157,20 +157,23 @@
   - Document breaking changes (none expected)
   - Document new dependencies required
 
-- [ ] **3.7 Update README with async documentation**
-  - Add async section to README
-  - Document installation with extras: `pip install oatk[async]`
-  - Document AsyncOAuthToolkit usage
-  - Document framework-specific integrations
-  - Update all examples to show both sync and async
+- [x] **3.7 Update README with async documentation**
+  - README.md created with quick start guide
+  - Installation documented with extras: `pip install oatk[async]`
+  - Sync and async examples included
+  - Framework integrations documented (Flask, Quart, FastAPI)
+  - Security disclaimer prominently displayed
 
-- [ ] **3.8 Set up CI/CD pipeline**
-  - Create `.github/workflows/test.yml`
-  - Run tests on Python 3.9, 3.10, 3.11, 3.12, 3.13
-  - Run linting with ruff
-  - Run type checking with mypy
-  - Run security audit with pip-audit
-  - Upload coverage to codecov (optional)
+- [x] **3.8 Set up CI/CD pipeline**
+  - Created `.github/workflows/test.yml` with multi-Python testing
+  - Tests run on Python 3.9, 3.10, 3.11, 3.12, 3.13
+  - Linting with ruff configured
+  - Type checking with mypy configured
+  - Security audit with pip-audit included
+  - Coverage upload to Codecov configured
+  - Documentation build workflow included
+  - Created `.github/workflows/publish.yml` for PyPI publishing
+  - Created `.readthedocs.yaml` for ReadTheDocs integration
 
 ### Phase 4: Release Preparation
 
