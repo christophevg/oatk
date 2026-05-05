@@ -1,113 +1,45 @@
-name: CI
+name: Test
 
-on:
-  push:
-    branches: [ master, main ]
-  pull_request:
-    branches: [ master, main ]
+on: [push, pull_request]
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v6
         with:
-          version: 'latest'
+          version: "latest"
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: |
-          uv sync --all-extras --dev
+        run: uv sync --frozen --all-extras
 
       - name: Run tests
-        run: |
-          uv run pytest --tb=short -v
-
-      - name: Run tests with coverage
-        if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-        run: |
-          uv run pytest --cov=oatk --cov-report=term-missing
-
-      - name: Upload coverage to Coveralls
-        if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: uv run pytest -v --cov=oatk --cov-report=xml
 
   lint:
-    name: Lint and Type Check
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --all-extras
+      - run: uv run ruff check oatk tests examples
+      - run: uv run ruff format --check oatk tests examples
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: 'latest'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          uv sync --dev
-
-      - name: Run ruff linting
-        run: |
-          uv run ruff check .
-
-      - name: Run ruff formatting check
-        run: |
-          uv run ruff format --check .
-
-      - name: Run mypy type checking
-        run: |
-          uv run mypy oatk
-
-  security:
-    name: Security Audit
+  typecheck:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: 'latest'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-extras
-
-      - name: Run pip-audit security check
-        run: |
-          uv pip install pip-audit
-          uv run pip-audit --ignore-vuln GHSA-g94j-rfh4-cjv5  # Ignore known false positives if any
-        continue-on-error: true
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --all-extras
+      - run: uv run mypy oatk
