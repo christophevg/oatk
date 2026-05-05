@@ -1,5 +1,6 @@
 import os
 import re
+
 import setuptools
 
 NAME             = "oatk"
@@ -15,7 +16,7 @@ CLASSIFIERS      = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.8",
   "Development Status :: 4 - Beta",
-  
+
 ]
 INSTALL_REQUIRES = [
   "pyjwt",
@@ -28,22 +29,22 @@ INSTALL_REQUIRES = [
   "flask_restful",
   "pymongo",
   "requests",
-  
+
 ]
 ENTRY_POINTS = {
   "console_scripts" : [
     "oatk=oatk.__main__:cli",
-    
+
   ]
 }
 SCRIPTS = [
-  
+
 ]
 
 HERE = os.path.dirname(__file__)
 
 def read(file):
-  with open(os.path.join(HERE, file), "r") as fh:
+  with open(os.path.join(HERE, file)) as fh:
     return fh.read()
 
 VERSION = re.search(
@@ -69,5 +70,5 @@ if __name__ == "__main__":
     install_requires=INSTALL_REQUIRES,
     entry_points=ENTRY_POINTS,
     scripts=SCRIPTS,
-    include_package_data=True    
+    include_package_data=True
   )

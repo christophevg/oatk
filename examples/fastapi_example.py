@@ -58,7 +58,6 @@ async def startup():
   # In production, load from files or use provider
   from cryptography.hazmat.backends import default_backend
   from cryptography.hazmat.primitives.asymmetric import rsa
-  from cryptography.hazmat.primitives import serialization
 
   private_key = rsa.generate_private_key(
     public_exponent=65537,

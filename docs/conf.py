@@ -2,6 +2,9 @@
 Sphinx configuration for oatk documentation.
 """
 
+import os
+import sys
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -18,9 +21,6 @@ author = 'Christophe VG'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-# Import version from package
-import os
-import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 try:

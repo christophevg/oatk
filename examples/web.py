@@ -1,6 +1,6 @@
-from flask import Flask, request, Response
-from flask_restful import Resource, Api
+from flask import Flask, Response, request
 from flask_cors import CORS
+from flask_restful import Api, Resource
 
 from oatk import OAuthToolkit
 
