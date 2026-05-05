@@ -8,6 +8,7 @@ for HTTP and file I/O while maintaining the same fluent API pattern.
 import json
 import logging
 import uuid
+from contextvars import ContextVar
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
@@ -19,6 +20,9 @@ from oatk.async_client import AsyncHttpClient
 from oatk.types import ClaimsDict, Decorator, JWKSDict, RequiredClaims
 
 logger = logging.getLogger(__name__)
+
+# Context variable for storing authorization token in async context
+_authorization_token: ContextVar[Optional[str]] = ContextVar('authorization_token', default=None)
 
 if TYPE_CHECKING:
   from AppKit import NSPasteboard
@@ -452,16 +456,112 @@ class AsyncOAuthToolkit:
         The result of f(*args, **kwargs) if authenticated, or an error response
 
     Note:
-        This method requires request context from an async framework.
-        Implementation is framework-specific.
+        This method requires the authorization token to be available via
+        get_authorization_token(). Use set_authorization_token() before calling
+        or pass the token in the request context.
     """
-    # Note: This implementation requires framework-specific request context
-    # For Quart/FastAPI, you would access request.headers differently
-    # This is a placeholder that should be overridden in framework-specific subclasses
-    raise NotImplementedError(
-      "execute_authenticated requires framework-specific implementation. "
-      "Use framework-specific decorators (e.g., authenticated_async)."
-    )
+    # Get authorization token from context
+    token = self.get_authorization_token()
+
+    if token is None:
+      return self._create_error_response("Missing Authorization", 401)
+
+    code = 403
+    msg = ""
+
+    try:
+      # Validate the token
+      await self.validate(token)
+
+      # Check required claims if specified
+      if required_claims:
+        claims = self.decode(token)
+        for claim, value in required_claims.items():
+          if claim not in claims:
+            raise ValueError(f"required claim {claim} is missing")
+          if callable(value):
+            if not value(claims[claim]):
+              raise ValueError(f"claim {claim} doesn't match required criteria")
+          elif type(value) is list:
+            if value not in claims[claim]:
+              raise ValueError(f"claim {claim} is missing required value")
+          elif value != claims[claim]:
+            raise ValueError(f"claim {claim} doesn't equal required value")
+
+      # authenticated -> execute the function
+      result = f(*args, **kwargs)
+      # Support both sync and async functions
+      if hasattr(result, '__await__'):
+        return await result
+      return result
+    except ValueError as e:
+      msg = str(e)
+      logger.warning(msg)
+    except Exception as e:
+      msg = repr(e)
+      logger.warning(f"unexpected exception: {msg}")
+
+    return self._create_error_response(msg, code)
+
+  def _create_error_response(self, message: str, status_code: int) -> Any:
+    """
+    Create an error response tuple for ASGI frameworks.
+
+    Most ASGI frameworks accept a tuple of (body, status_code) or
+    (body, status_code, headers) as return values.
+
+    Args:
+        message: Error message
+        status_code: HTTP status code
+
+    Returns:
+        Tuple suitable for ASGI framework response
+    """
+    return (message, status_code)
+
+  @staticmethod
+  def set_authorization_token(token: Optional[str]) -> None:
+    """
+    Set the authorization token in the current async context.
+
+    This method should be called before execute_authenticated() to provide
+    the authorization token. It uses contextvars for thread-safe async context.
+
+    Args:
+        token: The JWT token string (without 'Bearer ' prefix)
+
+    Example:
+        toolkit.set_authorization_token(request.headers.get('Authorization')[7:])
+        result = await toolkit.execute_authenticated(my_function, None)
+    """
+    _authorization_token.set(token)
+
+  @staticmethod
+  def get_authorization_token() -> Optional[str]:
+    """
+    Get the authorization token from the current async context.
+
+    Returns:
+        The JWT token string or None if not set
+    """
+    return _authorization_token.get()
+
+  @staticmethod
+  def extract_token_from_header(auth_header: Optional[str]) -> Optional[str]:
+    """
+    Extract the JWT token from an Authorization header value.
+
+    Args:
+        auth_header: The Authorization header value (e.g., "Bearer <token>")
+
+    Returns:
+        The JWT token string or None if not found
+    """
+    if not auth_header:
+      return None
+    if auth_header.startswith("Bearer "):
+      return auth_header[7:]
+    return None
 
   def authenticated(self, f: Callable[..., Any]) -> Callable[..., Any]:
     """
@@ -470,15 +570,38 @@ class AsyncOAuthToolkit:
     This decorator validates the Authorization header and executes the
     decorated function only if authentication succeeds.
 
+    IMPORTANT: Before the decorated function executes, you must set the
+    authorization token in the context using set_authorization_token() or
+    by using framework-specific middleware that extracts the token.
+
     Args:
         f: The async function to decorate
 
     Returns:
         Decorated function that validates authentication
 
-    Note:
-        This is a placeholder for framework-specific decorators.
-        Use framework-specific versions (e.g., quart_authenticated).
+    Example:
+        # Framework-agnostic approach with manual token setting
+        @toolkit.authenticated
+        async def protected_route():
+            return {"message": "authenticated"}
+
+        # In your middleware or before calling:
+        toolkit.set_authorization_token(extract_token_from_request(request))
+        result = await protected_route()
+
+        # Quart example (automatic extraction):
+        from quart import request
+
+        @app.route("/protected")
+        @toolkit.authenticated
+        async def protected():
+            toolkit.set_authorization_token(
+                toolkit.extract_token_from_header(
+                    request.headers.get("Authorization")
+                )
+            )
+            return {"message": "authenticated"}
     """
     @wraps(f)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -492,15 +615,32 @@ class AsyncOAuthToolkit:
     """
     Decorator factory for authenticating async routes with required claims.
 
+    IMPORTANT: Before the decorated function executes, you must set the
+    authorization token in the context using set_authorization_token() or
+    by using framework-specific middleware that extracts the token.
+
     Args:
-        **required_claims: Required claims as keyword arguments
+        **required_claims: Required claims as keyword arguments.
+                          Values can be:
+                          - str: exact match required
+                          - list: token claim must contain all values
+                          - callable: custom validation function
 
     Returns:
         Decorator function
 
-    Note:
-        This is a placeholder for framework-specific decorators.
-        Use framework-specific versions.
+    Example:
+        # Require specific role
+        @toolkit.authenticated_with_claims(role="admin")
+        async def admin_route():
+            return {"message": "admin only"}
+
+        # Use callable for custom validation
+        @toolkit.authenticated_with_claims(
+            exp=lambda exp: exp > time.time()  # Token not expired
+        )
+        async def protected_route():
+            return {"message": "valid token"}
     """
     def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
       @wraps(f)
