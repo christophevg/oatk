@@ -1,3 +1,9 @@
+-include ~/.claude/Makefile
+
+.PHONY: install sync test test-all test-file test-one \
+        typecheck lint format format-check check build publish \
+        publish-test clean clean-all help
+
 # colors
 
 GREEN=\033[0;32m
@@ -7,79 +13,102 @@ NC=\033[0m
 
 RUFF_PYTHON_VERSION ?= py311
 
-# Installation targets - uv manages virtualenvs automatically
+## Setup
 
-install:
+install: ## Install package in development mode with all extras
 	@echo "👷‍♂️ $(BLUE)syncing dependencies with uv$(NC)"
 	@uv sync --all-extras
 
-uninstall: clean-venv
+uninstall: clean-venv ## Remove virtual environment
 
-clean-venv:
+clean-venv: ## Remove virtual environment
 	@echo "👷‍♂️ $(RED)removing .venv directory$(NC)"
 	@-rm -rf .venv
 
-reinstall: clean-venv install
+reinstall: clean-venv install ## Clean install (removes venv and reinstalls)
 
-upgrade:
+upgrade: ## Upgrade all packages to latest versions
 	@echo "👷‍♂️ $(BLUE)upgrading all packages$(NC)"
 	@uv sync --all-extras --upgrade
 
 sync: ## Sync dependencies from lock file
 	uv sync --frozen --all-extras
 
-# functional targets
+## Testing
 
-test: format-check lint typecheck pytest
+test: format-check lint typecheck pytest ## Run all tests with coverage and checks
 
 test-all: ## Run tests against all supported Python versions (3.10, 3.11, 3.12)
 	uv run tox
 
-pytest:
+test-file: ## Run specific test file (usage: make test-file FILE=tests/test_x.py)
+	uv run pytest $(FILE)
+
+test-one: ## Run specific test (usage: make test-one TEST=tests/test_x.py::test_func)
+	uv run pytest $(TEST)
+
+pytest: ## Run tests with pytest
 	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
 	@uv run --extra dev pytest -v
 
-coverage:
+coverage: ## Run tests with coverage reporting
 	@echo "👷‍♂️ $(BLUE)running tests with coverage$(NC)"
-	@uv run --extra dev pytest --cov=oatk --cov-report=term --cov-report=html --cov-report=lcov
+	@uv run --extra dev pytest --cov=src --cov-report=term --cov-report=html --cov-report=lcov
 
-lint:
-	@echo "👷‍♂️ $(BLUE)running linter$(NC)"
-	@uv run --extra dev ruff check --target-version=$(RUFF_PYTHON_VERSION) .
+## Code Quality
 
-typecheck:
+typecheck: ## Run mypy type checking
 	@echo "👷‍♂️ $(BLUE)running type checking$(NC)"
-	@uv run mypy --strict oatk
+	@uv run mypy --strict src/oatk
 
-format-check:
+lint: ## Run ruff linting
+	@echo "👷‍♂️ $(BLUE)running linter$(NC)"
+	@uv run --extra dev ruff check --target-version=$(RUFF_PYTHON_VERSION) src/oatk tests examples
+
+format: ## Format code with ruff
 	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
-	@uv run ruff format --check oatk tests examples
+	@uv run ruff format src/oatk tests examples
 
-format:
-	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
-	@uv run ruff format oatk tests examples
+format-check: ## Check formatting without making changes
+	@echo "👷‍♂️ $(BLUE)checking formatting$(NC)"
+	@uv run ruff format --check src/oatk tests examples
 
-# packaging targets
+check: typecheck lint format-check ## Run all checks (typecheck, lint, format-check)
 
-publish-test: dist
+## Build & Publish
+
+build: dist ## Build package distributions
+
+publish-test: dist ## Build and publish to TestPyPI
 	@echo "👷‍♂️ $(BLUE)publishing to PyPI test$(NC)"
 	uv publish --repository testpypi
 
-publish: dist
+publish: dist ## Build and publish to PyPI
 	@echo "👷‍♂️ $(BLUE)publishing to PyPI$(NC)"
 	uv publish
 
-dist: dist-clean
+dist: dist-clean ## Build distributions
 	@echo "👷‍♂️ $(BLUE)building distribution$(NC)"
 	uv build
 
-dist-clean:
+dist-clean: ## Clean build artifacts
 	@rm -rf dist build *.egg-info
 
-clean:
-	@find . -type f -name "*.backup" -delete
+## Cleanup
 
-.PHONY: install uninstall clean-venv reinstall upgrade apply update run test pytest coverage lint publish-test publish dist dist-clean clean
+clean: ## Remove build artifacts and backup files
+	@find . -type f -name "*.backup" -delete
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+
+clean-all: clean dist-clean clean-venv ## Deep clean (removes venv, build artifacts, caches)
+
+## Help
+
+help: ## Show this help message
+	@echo "Usage: make [target]"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 # include optional a personal/local touch
 

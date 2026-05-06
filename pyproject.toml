@@ -92,8 +92,14 @@ Repository = "https://github.com/christophevg/oatk"
 [project.scripts]
 oatk = "oatk.__main__:cli"
 
+[tool.hatch.build]
+sources = ["src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/oatk"]
+
 [tool.hatch.version]
-path = "oatk/__init__.py"
+path = "src/oatk/__init__.py"
 pattern = "__version__ = ['\"](?P<version>[^'\"]+)['\"]"
 
 [tool.ruff]
@@ -160,19 +166,15 @@ ignore_missing_imports = true
 module = ["oatk.fake.*", "oatk"]
 ignore_errors = true
 
-[[tool.mypy.overrides]]
-module = ["oatk.fake.*"]
-ignore_errors = true
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=yoker --cov-report=term-missing"
+addopts = "-v --cov=src --cov-report=term-missing"
 
 [tool.coverage.run]
-source = ["oatk"]
+source = ["src"]
 branch = true
 omit = [
   "*/tests/*",
@@ -199,7 +201,7 @@ commands_pre = [
   ["uv", "pip", "install", "pytest", "pytest-cov", "pytest-asyncio", ],
 ]
 commands = [
-  ["pytest", "tests", "-v", "--cov=yoker", "--cov-report=term-missing"],
+  ["pytest", "tests", "-v", "--cov=src", "--cov-report=term-missing"],
 ]
 
 [tool.tox.env.py310]

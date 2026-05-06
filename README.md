@@ -1,8 +1,11 @@
 # oatk - OAuth Toolkit
 
 [![Latest Version on PyPI](https://img.shields.io/pypi/v/oatk.svg)](https://pypi.python.org/pypi/oatk/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/oatk.svg)](https://pypistats.org/packages/oatk)
 [![Supported Implementations](https://img.shields.io/pypi/pyversions/oatk.svg)](https://pypi.python.org/pypi/oatk/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/christophevg/oatk/actions/workflows/test.yml/badge.svg)](https://github.com/christophevg/oatk/actions/workflows/test.yml)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-7c85a3.svg)](https://docs.astral.sh/ruff/)
 
 A clean, simple Python OAuth toolkit for quick prototypes and learning. Provides both synchronous and asynchronous implementations with framework integrations for Flask, Quart, and FastAPI.
 

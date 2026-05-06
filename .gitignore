@@ -1,17 +1,48 @@
-*.pem
-venv
-dist
-*.egg-info
-*.pyc
-build
-.coverage
-.tox
-docs/_build
-*.backup
-local
-.DS_Store
-certs.json
-token.txt
-*.local
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+
+# Type checking
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Documentation
+docs/_build/
+
+# Project specific
+*.pem
+certs.json
+token.txt
+*.backup
+local
+
+# Local configuration
+*.local
+.env.local

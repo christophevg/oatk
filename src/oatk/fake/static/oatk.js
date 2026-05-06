@@ -16,24 +16,6 @@
 
   function clear(name) {
     save(name, null);
-    return null;
-  }
-  
-  function reset() {
-    clear("oauth_url");
-    clear("oauth_code");
-    clear("oauth_token");
-    clear("oauth_code_challenge");
-    clear("oauth_code_verifier");
-  }
-
-  function randomString(length) {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
   }
 
   // private state
@@ -46,76 +28,55 @@
   var urls  = load("oauth_url"),
       code  = load("oauth_code"),
       token = load("oauth_token");
-  
-  var well_known_url = null;
-    
-  var client_id     = null,
-      required_flow = null;
-  
-  const nonce = randomString(32),
-        state = randomString(32);
-
-  var code_challenge = load("oauth_code_challenge"),
-      code_verifier  = load("oauth_code_verifier");
 
   // We might be called from a redirect after login by the user.
   // Try to extract code from URL.
   // TODO:
   var queryString = window.location.search,
     urlParams = new URLSearchParams(queryString),
-    new_code = urlParams.get("code"),
-    new_token = urlParams.get("access_token");
+    new_code = urlParams.get("code");
 
-  // access_token could come in as a fragmented id_token (in case of implicit)
-  if(   ! new_code
-     && window.location.hash
-     && location.href.indexOf("#") != -1
-  ) {
-    // console.log("parsing args", location.hash.substring(1));
-    var args = {};
-    window.location.hash.substring(1).split("&").forEach(
-      function(kv) {
-        var parts = kv.split("=");
-        args[parts[0]] = parts[1];
-      }
-    );
-    // console.log("args", args);
-    if(args["id_token"]) {
-      new_token = args["id_token"];
-      // clear hash
-      window.location.hash = "";
-    }
-  }
-
-  if(new_code && new_code != code) {
-    // console.log("got new code", new_code, "previous code", code);
+  if (new_code && new_code != code) {
+    console.log("got new code", new_code, "previous code", code);
     code = save("oauth_code", new_code);
     // reset token, since we got a different new code, triggering getting it
     token = clear("oauth_token");
-  } else if( new_token && new_token != token ) {
-    // console.log("get new access_token", new_token, "previous token", token);
-    token = save("oauth_token", new_token);
-    // console.log("got token", parseJwt(token));
   }
 
   // URLs
 
+  const well_known_url = "http://localhost:5000/oauth/well-known";
+
   function get_urls() {
-    if( ! well_known_url ) {
-      console.warn("No well_known_url defined. Use `using_provider` to initialize one.");
-      return;
-    }
     console.log("getting urls...");
     // get well-known to bootstrap
     $.getJSON(well_known_url, function(result) {
       urls = save("oauth_url", result);
-      console.log("got urls!");
+      console.log("got urls!")
       flow();
     });
   }
 
   // CODE
-  
+
+  const client_id = "test";
+
+  function randomString(length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  }
+
+  const nonce = randomString(),
+        state = randomString();
+
+  var code_challenge = load("oauth_code_challenge"),
+      code_verifier  = load("oauth_code_verifier");
+
+
   function dec2hex(dec) {
     return ('0' + dec.toString(16)).substr(-2)
   }
@@ -148,7 +109,7 @@
   }
 
   if (!code_challenge || !code_verifier) {
-    code_verifier = save("oauth_code_verifier",  generateRandomString());
+    code_verifier = save("oauth_code_verificer",  generateRandomString());
     code_challenge = save("oauth_code_challenge", challenge_from_verifier(code_verifier));
   }
 
@@ -159,14 +120,14 @@
     // goto auth point, in the end we're redirected here with a ?code=... arg
     window.location.href = urls["authorization_endpoint"] +
       "?client_id=" + client_id +
-      "&redirect_uri=" + window.location.href +
+      "&redirect_uri=" + window.location +
       "&response_type=code" +
       "&response_mode=fragment" +
       "&scope=openid profile" +
       "&state=" + state +
       "&nonce=" + nonce +
       "&code_challenge=" + code_challenge,
-      "&code_challenge_method=S256";
+      "&code_challenge_method=S256"
   }
 
   // TOKEN
@@ -181,7 +142,7 @@
         code: code,
         grant_type: "authorization_code",
         client_id: client_id,
-        redirect_uri: window.location.href.split("?")[0],
+        redirect_uri: window.location,
         code_verifier: code_verifier
       }),
       success: function(response) {
@@ -192,26 +153,6 @@
       contentType: "application/json",
       dataType: "json"
     });
-  }
-
-  function get_implicit_token() {
-    // goto auth point, in the end we're redirected here with a ?access_token=...&...&id_token=... arg
-    var u = urls["authorization_endpoint"] +
-      "?client_id=" + client_id +
-      "&response_type=" + encodeURIComponent("token id_token") +
-      "&nonce=" + nonce +
-      "&state=" + state +
-      "&include_granted_scopes=true" +
-      "&scope=" + encodeURIComponent("openid profile email") +
-      "&redirect_uri=" + encodeURIComponent(window.location.href.split("?")[0].split("#")[0].replace(/\/$/, ""))
-    console.log("➡️ getting implicit_token...");
-    setTimeout(function() {
-      console.warn("Redirecting to authorisation endpoint failed 🥺");
-      console.warn(u);
-      reset();
-      console.warn("All local information is cleared, try refreshing the page to restart.");
-    }, 5000);
-    window.location.href = new URL(u).href;
   }
 
   function parseJwt(token) {
@@ -244,10 +185,13 @@
   // Public API
 
   // we expose one function to the application, which triggers the entire flow
-  // and results in a user object and an http module with functions to get, 
+  // and results in a user object and an http module with functions to get,
   // post, put and delete remote resources, adding the required authentication.
-  var http = {
-      getJSON: function(url, on_success, on_error) {
+  var user = {
+      "name": "todo"
+    }, // TODO
+    http = {
+      "getJSON": function(url, on_success) {
         $.ajax({
           type: "GET",
           url: url,
@@ -255,74 +199,25 @@
             "Authorization": "Bearer " + token
           },
           success: on_success,
-          error: on_error,
-          dataType: "json"
-        });
-      },
-      postJSON: function(url, data, on_success, on_error) {
-        $.ajax({
-          type: "POST",
-          url: url,
-          data : data,
-          headers: {
-            "Authorization": "Bearer " + token
-          },
-          success: on_success,
-          error: on_error,
           dataType: "json"
         });
       }
     },
-    logout = function(after_logout) {
+    logout = function() {
       // clear locals
-      code  = clear("oauth_code");
-      token = clear("oauth_token");
-      if(urls["end_session_endpoint"]) {
-        // goto logout endpoint
-        window.location.href = urls["end_session_endpoint"] +
-          "?client_id=" + client_id +
-          "&redirect_uri=" + window.location.href;
-      }
-      if(after_logout) {
-        after_logout();
-      }
+      clear("oauth_code");
+      clear("oauth_token");
+      // goto logout endpoint
+      window.location.href = urls["end_session_endpoint"] +
+        "?client_id=" + client_id +
+        "&redirect_uri=" + window.location;
     },
     callback = null;
 
-  // exposed functions
-
+  // exposed function
   var with_authenticated_user = function with_authenicated_user(on_success) {
     callback = on_success;
     flow(); // start flow
-  }
-
-  function have_authenticated_user() {
-    return token != null;
-  }
-  
-  function using_provider(url) {
-    well_known_url = url;
-  }
-  
-  function using_client_id(id) {
-    client_id = id;
-  }
-
-  function apply_flow(flow) {
-    required_flow = flow;
-  }
-  
-  function user_info_from_token() {
-    var user = {};
-    if(token) {
-      var parsed_token = parseJwt(token);
-      ["email", "name", "given_name", "family_name", "picture"].map(function(key) {
-        if(parsed_token[key]) {
-          user[key] = parsed_token[key]
-        }
-      });
-    }
-    return user;
   }
 
   function flow() {
@@ -330,43 +225,29 @@
       return get_urls();
     }
     console.log("✅ URLs");
-
-    if(! token ) {
-      if( required_flow == "implicit") {
-        return get_implicit_token();
-      }
-    } else {
-      if( required_flow != "implicit") {
-        if (!code) {
-          return get_code();
-        }
-        console.log("✅ authorization code");
-        return get_token();
-      }
+    if (!code) {
+      return get_code();
+    }
+    console.log("✅ authorization code");
+    if (!token) {
+      return get_token();
     }
     console.log("✅ access token");
+    if (!callback) {
+      return alert("no callback?!");
+    }
 
     // we've got everyting...
-    if(callback) {
-      callback(user_info_from_token(), http, logout);
-    }
+    callback(user, http, logout);
   }
 
   globals.oatk = {
-    "using_provider":          using_provider,
-    "using_client_id":         using_client_id,
-    "apply_flow":              apply_flow,
-    "with_authenticated_user": with_authenticated_user,
-    "have_authenticated_user": have_authenticated_user,
-    "get_user_info":           user_info_from_token,
-    "http":                    http,
-    "login":                   flow,
-    "logout":                  logout
+    "with_authenticated_user": with_authenticated_user
   };
 
 
   // helper
-  
+
   /*
   Copyright 2022 Andrea Griffini
 
