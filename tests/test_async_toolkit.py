@@ -471,8 +471,9 @@ class TestAsyncOAuthToolkitDecode:
 
   @pytest.mark.asyncio
   async def test_decode_token_without_validation(
-    self, private_key_file, public_key_file
-  ):  # noqa: ARG002
+    self,
+    private_key_file,
+  ):
     """
     Given: An AsyncOAuthToolkit and a token
     When: Calling decode() without public key

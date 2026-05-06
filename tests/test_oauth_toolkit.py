@@ -389,7 +389,7 @@ class TestTokenValidation:
     with pytest.raises(Exception):  # noqa: B017
       configured_oauth_toolkit.validate(token)
 
-  def test_validate_token_with_unknown_kid(self, oauth_toolkit_with_jwks):  # noqa: ARG002
+  def test_validate_token_with_unknown_kid(self):
     """
     Given: A token with unknown kid
     When: Validating the token

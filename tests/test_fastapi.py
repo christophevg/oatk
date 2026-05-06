@@ -145,8 +145,7 @@ class TestGetCurrentUser:
   @pytest.mark.asyncio
   async def test_get_current_user_invalid_token_raises_403(
     self,
-    private_key_file,
-    public_key_file,  # noqa: ARG002
+    public_key_file,
   ):
     """
     Given: An invalid JWT token
