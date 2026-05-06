@@ -27,7 +27,7 @@ upgrade:
 
 # functional targets
 
-test: lint typecheck pytest
+test: format-check lint typecheck pytest
 
 pytest:
 	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
@@ -44,6 +44,10 @@ lint:
 typecheck:
 	@echo "👷‍♂️ $(BLUE)running type checking$(NC)"
 	@uv run mypy --strict oatk
+
+format-check:
+	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
+	@uv run ruff format --check oatk tests examples
 
 format:
 	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
