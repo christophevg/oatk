@@ -9,10 +9,6 @@ client = MongoClient(server)
 db: Database = client[db_name]
 
 
-
-
-
-
 # https://github.com/lepture/authlib/blob/master/authlib/integrations/sqla_oauth2/client_mixin.py
 
 # client = {

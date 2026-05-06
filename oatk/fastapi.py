@@ -161,6 +161,7 @@ class OAuthToolkitDependency:
         ):
             return {"message": "premium access granted"}
     """
+
     async def dependency(
       _request: Request,
       credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),

@@ -223,11 +223,7 @@ class AsyncOAuthToolkit:
     from authlib.jose import jwk
 
     return json.dumps(
-      {
-        "keys": [
-          jwk.dumps(self._public_key, kty="RSA", alg=self._alg, kid=self._kid)
-        ]
-      },
+      {"keys": [jwk.dumps(self._public_key, kty="RSA", alg=self._alg, kid=self._kid)]},
       indent=2,
     )
 
@@ -492,7 +488,7 @@ class AsyncOAuthToolkit:
       # authenticated -> execute the function
       result = f(*args, **kwargs)
       # Support both sync and async functions
-      if hasattr(result, '__await__'):
+      if hasattr(result, "__await__"):
         return await result
       return result
     except ValueError as e:
@@ -538,15 +534,14 @@ class AsyncOAuthToolkit:
         async def protected_route():
             return {"message": "authenticated"}
     """
+
     @wraps(f)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
       return await self.execute_authenticated(f, None, *args, **kwargs)
 
     return wrapper
 
-  def authenticated_with_claims(
-    self, **required_claims: ClaimValue
-  ) -> Decorator:
+  def authenticated_with_claims(self, **required_claims: ClaimValue) -> Decorator:
     """
     Decorator factory for authenticating async routes with required claims.
 
@@ -573,6 +568,7 @@ class AsyncOAuthToolkit:
         async def protected_route():
             return {"message": "valid token"}
     """
+
     def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
       @wraps(f)
       async def wrapper(*args: Any, **kwargs: Any) -> Any:

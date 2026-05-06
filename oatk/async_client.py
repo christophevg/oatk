@@ -88,9 +88,7 @@ class AsyncHttpClient:
         httpx.HTTPError: If the request fails
     """
     if self._client is None:
-      raise RuntimeError(
-        "AsyncHttpClient must be used as an async context manager"
-      )
+      raise RuntimeError("AsyncHttpClient must be used as an async context manager")
 
     logger.debug(f"GET {url}")
     response = await self._client.get(url, params=params, headers=headers)
@@ -121,9 +119,7 @@ class AsyncHttpClient:
         httpx.HTTPError: If the request fails
     """
     if self._client is None:
-      raise RuntimeError(
-        "AsyncHttpClient must be used as an async context manager"
-      )
+      raise RuntimeError("AsyncHttpClient must be used as an async context manager")
 
     logger.debug(f"POST {url}")
     response = await self._client.post(url, data=data, json=json, headers=headers)

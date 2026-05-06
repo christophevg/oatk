@@ -21,4 +21,3 @@ oauth2.validate(token)
 
 # or as a chained one-liner
 OAuthToolkit().with_jwks(jwks).validate(token)
-

@@ -56,9 +56,7 @@ class TestExecuteAuthenticated:
     assert result == ("Missing Authorization", 401)
 
   @pytest.mark.asyncio
-  async def test_execute_authenticated_invalid_token_returns_403(
-    self, public_key_file
-  ):
+  async def test_execute_authenticated_invalid_token_returns_403(self, public_key_file):
     """
     Given: A request with invalid token
     When: Calling execute_authenticated

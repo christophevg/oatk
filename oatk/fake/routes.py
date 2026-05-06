@@ -16,6 +16,7 @@ from .db import db
 
 logger = logging.getLogger(__name__)
 
+
 @server.route("/", methods=["GET", "POST"])
 def home() -> str:
   """
@@ -41,6 +42,7 @@ def home() -> str:
     return render_template("home.html", user=user, clients=clients)
   else:
     return render_template("login.html")
+
 
 @server.route("/oauth/create-client", methods=["GET", "POST"])
 def create_client() -> str:
@@ -83,6 +85,7 @@ def create_client() -> str:
   except Exception:
     logger.exception("failed to register client")
   return redirect("/")
+
 
 @server.route("/oauth/authorize", methods=["GET", "POST"])
 def authorize() -> str:
@@ -147,6 +150,7 @@ def authorize() -> str:
     logger.exception(error)
     return jsonify({"error": str(error)})
   return render_template("authorize.html", grant=grant)
+
 
 @server.route("/oauth/token", methods=["POST"])
 def issue_token() -> dict[str, Any]:
@@ -247,8 +251,6 @@ def split_by_crlf(s: str) -> list[str]:
 UNICODE_ASCII_CHARACTER_SET = string.ascii_letters + string.digits
 
 
-def generate_token(
-  length: int = 30, chars: str = UNICODE_ASCII_CHARACTER_SET
-) -> str:
+def generate_token(length: int = 30, chars: str = UNICODE_ASCII_CHARACTER_SET) -> str:
   rand = random.SystemRandom()
   return "".join(rand.choice(chars) for _ in range(length))

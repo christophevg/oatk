@@ -26,9 +26,7 @@ async def create_test_keys():
 
   # Generate RSA key pair
   private_key = rsa.generate_private_key(
-    public_exponent=65537,
-    key_size=2048,
-    backend=default_backend()
+    public_exponent=65537, key_size=2048, backend=default_backend()
   )
   public_key = private_key.public_key()
 
@@ -36,12 +34,12 @@ async def create_test_keys():
   private_pem = private_key.private_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PrivateFormat.PKCS8,
-    encryption_algorithm=serialization.NoEncryption()
+    encryption_algorithm=serialization.NoEncryption(),
   )
 
   public_pem = public_key.public_bytes(
     encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
+    format=serialization.PublicFormat.SubjectPublicKeyInfo,
   )
 
   return private_pem, public_pem
@@ -81,9 +79,7 @@ def create_quart_app(toolkit: AsyncOAuthToolkit) -> "Quart":  # noqa: F821
     return jsonify({"message": "Specific user access granted"})
 
   @app.route("/validator")
-  @toolkit.authenticated_with_claims(
-    exp=lambda exp: exp > time.time()
-  )
+  @toolkit.authenticated_with_claims(exp=lambda exp: exp > time.time())
   async def validator_route():
     return jsonify({"message": "Token is valid and not expired"})
 
@@ -126,7 +122,7 @@ async def main():
       iss="https://test.example.com",
       aud="test-client-id",
       role="admin",
-      exp=int(time.time()) + 3600
+      exp=int(time.time()) + 3600,
     )
     admin_token = toolkit.token
 
@@ -135,7 +131,7 @@ async def main():
       iss="https://test.example.com",
       aud="test-client-id",
       role="user",
-      exp=int(time.time()) + 3600
+      exp=int(time.time()) + 3600,
     )
     user_token = toolkit.token
 
@@ -144,7 +140,7 @@ async def main():
       iss="https://test.example.com",
       aud="test-client-id",
       role="user",
-      exp=int(time.time()) + 3600
+      exp=int(time.time()) + 3600,
     )
     specific_user_token = toolkit.token
 
@@ -186,8 +182,7 @@ async def main():
       # Test protected route with valid token
       print("\n3. Testing protected route with valid admin token:")
       response = await client.get(
-        "/protected",
-        headers={"Authorization": f"Bearer {admin_token}"}
+        "/protected", headers={"Authorization": f"Bearer {admin_token}"}
       )
       print(f"   Status: {response.status_code}")
       print(f"   Data: {await response.get_json()}")
@@ -195,8 +190,7 @@ async def main():
       # Test admin route with admin token
       print("\n4. Testing admin route with admin token:")
       response = await client.get(
-        "/admin",
-        headers={"Authorization": f"Bearer {admin_token}"}
+        "/admin", headers={"Authorization": f"Bearer {admin_token}"}
       )
       print(f"   Status: {response.status_code}")
       print(f"   Data: {await response.get_json()}")
@@ -204,8 +198,7 @@ async def main():
       # Test admin route with non-admin token
       print("\n5. Testing admin route with non-admin token:")
       response = await client.get(
-        "/admin",
-        headers={"Authorization": f"Bearer {user_token}"}
+        "/admin", headers={"Authorization": f"Bearer {user_token}"}
       )
       print(f"   Status: {response.status_code}")
       print(f"   Data: {await response.get_json()}")
@@ -213,8 +206,7 @@ async def main():
       # Test user-specific route
       print("\n6. Testing user-specific route with matching user:")
       response = await client.get(
-        "/user",
-        headers={"Authorization": f"Bearer {specific_user_token}"}
+        "/user", headers={"Authorization": f"Bearer {specific_user_token}"}
       )
       print(f"   Status: {response.status_code}")
       print(f"   Data: {await response.get_json()}")
@@ -222,8 +214,7 @@ async def main():
       # Test validator route
       print("\n7. Testing validator route with valid token:")
       response = await client.get(
-        "/validator",
-        headers={"Authorization": f"Bearer {admin_token}"}
+        "/validator", headers={"Authorization": f"Bearer {admin_token}"}
       )
       print(f"   Status: {response.status_code}")
       print(f"   Data: {await response.get_json()}")

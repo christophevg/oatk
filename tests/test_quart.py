@@ -41,6 +41,7 @@ class TestQuartAuthenticated:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated
       async def protected_route():
         return {"message": "authenticated"}
@@ -71,6 +72,7 @@ class TestQuartAuthenticated:
     mock_request.headers.get = MagicMock(return_value=None)
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated
       async def protected_route():
         return {"message": "should not reach here"}
@@ -80,9 +82,7 @@ class TestQuartAuthenticated:
     assert result == ("Missing Authorization", 401)
 
   @pytest.mark.asyncio
-  async def test_quart_authenticated_invalid_token(
-    self, public_key_file
-  ):
+  async def test_quart_authenticated_invalid_token(self, public_key_file):
     """
     Given: A Quart route decorated with @toolkit.authenticated
     When: Request includes invalid token
@@ -100,6 +100,7 @@ class TestQuartAuthenticated:
     mock_request.headers.get = MagicMock(return_value="Bearer invalid-token")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated
       async def protected_route():
         return {"message": "should not reach here"}
@@ -161,6 +162,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated_with_claims(sub=sample_claims["sub"])
       async def protected_route():
         return {"message": "authenticated"}
@@ -195,6 +197,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated_with_claims(missing_claim="value")
       async def protected_route():
         return {"message": "should not reach here"}
@@ -231,6 +234,7 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated_with_claims(sub="wrong-user")
       async def protected_route():
         return {"message": "should not reach here"}
@@ -265,9 +269,8 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      @toolkit.authenticated_with_claims(
-        sub=lambda x: x.startswith("test-user")
-      )
+
+      @toolkit.authenticated_with_claims(sub=lambda x: x.startswith("test-user"))
       async def protected_route():
         return {"message": "authenticated"}
 
@@ -324,9 +327,9 @@ class TestQuartAuthenticatedWithClaims:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
+
       @toolkit.authenticated_with_claims(
-        sub=sample_claims["sub"],
-        iss=sample_claims["iss"]
+        sub=sample_claims["sub"], iss=sample_claims["iss"]
       )
       async def protected_route():
         return {"message": "authenticated"}
@@ -384,8 +387,7 @@ class TestQuartIntegration:
 
       # Test with valid token
       response = await client.get(
-        "/protected",
-        headers={"Authorization": f"Bearer {token}"}
+        "/protected", headers={"Authorization": f"Bearer {token}"}
       )
       assert response.status_code == 200
       data = await response.get_json()
@@ -393,8 +395,7 @@ class TestQuartIntegration:
 
       # Test admin route with matching claim
       response = await client.get(
-        "/admin",
-        headers={"Authorization": f"Bearer {token}"}
+        "/admin", headers={"Authorization": f"Bearer {token}"}
       )
       assert response.status_code == 200
       data = await response.get_json()
@@ -433,7 +434,6 @@ class TestQuartIntegration:
 
     async with app.test_client() as client:
       response = await client.get(
-        "/protected",
-        headers={"Authorization": f"Bearer {token}"}
+        "/protected", headers={"Authorization": f"Bearer {token}"}
       )
       assert response.status_code == 200

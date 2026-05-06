@@ -45,6 +45,10 @@ typecheck:
 	@echo "👷‍♂️ $(BLUE)running type checking$(NC)"
 	@uv run mypy --strict oatk
 
+format:
+	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
+	@uv run ruff format oatk tests examples
+
 # packaging targets
 
 publish-test: dist

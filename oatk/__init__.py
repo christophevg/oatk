@@ -34,6 +34,7 @@ except ModuleNotFoundError:
   logger.debug("No AppKit installed, so no MacOS clipboard support!")
   pb = None
 
+
 class OAuthToolkit:
   def __init__(self) -> None:
     self._encoded: str | None = None
@@ -101,17 +102,11 @@ class OAuthToolkit:
   @property
   def jwks(self) -> str:
     return json.dumps(
-      {
-        "keys": [
-          jwk.dumps(self._public_key, kty="RSA", alg=self._alg, kid=self._kid)
-        ]
-      },
+      {"keys": [jwk.dumps(self._public_key, kty="RSA", alg=self._alg, kid=self._kid)]},
       indent=2,
     )
 
-  def with_jwks(
-    self, path_or_string_or_obj: str | bytes | JWKSDict
-  ) -> OAuthToolkit:
+  def with_jwks(self, path_or_string_or_obj: str | bytes | JWKSDict) -> OAuthToolkit:
     try:
       with open(path_or_string_or_obj) as fp:
         jwks: JWKSDict = json.load(fp)

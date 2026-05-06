@@ -144,7 +144,9 @@ class TestGetCurrentUser:
 
   @pytest.mark.asyncio
   async def test_get_current_user_invalid_token_raises_403(
-    self, private_key_file, public_key_file  # noqa: ARG002
+    self,
+    private_key_file,
+    public_key_file,  # noqa: ARG002
   ):
     """
     Given: An invalid JWT token
@@ -294,9 +296,7 @@ class TestRequireClaims:
     token = toolkit.token
 
     oauth = OAuthToolkitDependency(toolkit)
-    dependency = oauth.require_claims(
-      tier=lambda t: t in ["gold", "platinum"]
-    )
+    dependency = oauth.require_claims(tier=lambda t: t in ["gold", "platinum"])
 
     from unittest.mock import MagicMock
 
@@ -329,9 +329,7 @@ class TestRequireClaims:
     token = toolkit.token
 
     oauth = OAuthToolkitDependency(toolkit)
-    dependency = oauth.require_claims(
-      tier=lambda t: t == "platinum"
-    )
+    dependency = oauth.require_claims(tier=lambda t: t == "platinum")
 
     from unittest.mock import MagicMock
 
@@ -475,9 +473,7 @@ class TestFastAPIIntegration:
     assert response.status_code == 200
     assert response.json()["admin_id"] == "test-user"
 
-  def test_fastapi_app_rejects_wrong_claims(
-    self, private_key_file, public_key_file
-  ):
+  def test_fastapi_app_rejects_wrong_claims(self, private_key_file, public_key_file):
     """
     Given: A FastAPI app with require_claims
     When: Token has wrong claim value

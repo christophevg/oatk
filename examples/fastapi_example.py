@@ -60,9 +60,7 @@ async def startup():
   from cryptography.hazmat.primitives.asymmetric import rsa
 
   private_key = rsa.generate_private_key(
-    public_exponent=65537,
-    key_size=2048,
-    backend=default_backend()
+    public_exponent=65537, key_size=2048, backend=default_backend()
   )
   public_key = private_key.public_key()
 
@@ -111,9 +109,7 @@ async def admin(user: dict = Depends(oauth.require_claims(role="admin"))):
 # Premium endpoint - requires premium tier
 @app.get("/premium")
 async def premium(
-  user: dict = Depends(
-    oauth.require_claims(tier=lambda t: t in ["gold", "platinum"])
-  )
+  user: dict = Depends(oauth.require_claims(tier=lambda t: t in ["gold", "platinum"])),
 ):
   """
   Premium endpoint with callable validation.
@@ -134,7 +130,7 @@ async def manager(
       role="manager",
       department="engineering",
     )
-  )
+  ),
 ):
   """
   Endpoint requiring multiple claims to match.
@@ -190,7 +186,7 @@ async def generate_token(
 
 # Custom dependency combining authentication with business logic
 async def get_current_admin(
-  user: dict = Depends(oauth.require_claims(role="admin"))
+  user: dict = Depends(oauth.require_claims(role="admin")),
 ) -> dict:
   """
   Example of combining dependencies.
