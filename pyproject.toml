@@ -35,13 +35,31 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
+all = [
   "pytest",
+  "pytest-cov",
   "pytest-asyncio",
   "pytest-httpx",
   "ruff",
   "mypy",
   "coverage",
+  "tox>=4.0.0",
+  "tox-uv>=1.0.0",
+  "httpx",
+  "anyio",
+  "quart",
+  "fastapi",
+]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "pytest-asyncio",
+  "pytest-httpx",
+  "ruff",
+  "mypy",
+  "coverage",
+  "tox>=4.0.0",
+  "tox-uv>=1.0.0",
 ]
 run = [
   "gunicorn",
@@ -151,7 +169,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --cov=yoker --cov-report=term-missing"
 
 [tool.coverage.run]
 source = ["oatk"]
@@ -170,3 +188,25 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.tox]
+env_list = ["py310", "py311", "py312"]
+
+[tool.tox.env_run_base]
+description = "run tests with pytest"
+commands_pre = [
+  ["uv", "pip", "install", "-e", ".[all]"],
+  ["uv", "pip", "install", "pytest", "pytest-cov", "pytest-asyncio", ],
+]
+commands = [
+  ["pytest", "tests", "-v", "--cov=yoker", "--cov-report=term-missing"],
+]
+
+[tool.tox.env.py310]
+base_python = ["python3.10"]
+
+[tool.tox.env.py311]
+base_python = ["python3.11"]
+
+[tool.tox.env.py312]
+base_python = ["python3.12"]

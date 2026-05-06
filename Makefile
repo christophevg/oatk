@@ -25,9 +25,15 @@ upgrade:
 	@echo "👷‍♂️ $(BLUE)upgrading all packages$(NC)"
 	@uv sync --all-extras --upgrade
 
+sync: ## Sync dependencies from lock file
+	uv sync --frozen --all-extras
+
 # functional targets
 
 test: format-check lint typecheck pytest
+
+test-all: ## Run tests against all supported Python versions (3.10, 3.11, 3.12)
+	uv run tox
 
 pytest:
 	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
