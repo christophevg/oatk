@@ -4,6 +4,19 @@
 
 ### Phase 1: Infrastructure Modernization
 
+- [ ] **1.12 Standardize project setup across repositories**
+  - Review ../yoker project setup (Makefile, uv, GitHub, docs, testing, style, checking, pyproject.toml, README)
+  - Review /python-project standard documentation
+  - Compare with current oatk setup
+  - Identify best practices from each source
+  - Document recommended standard in /python-project (if not already complete)
+  - Present proposed changes to user for approval before application
+  - Apply approved changes to oatk project
+
+  **Note:** This is a meta-task for cross-project standardization. All changes must be presented as choices to the user before application. Consider splitting into subtasks if scope is large.
+
+  **Priority:** P2-High - Standardization should be done early to avoid rework
+
 - [ ] **1.2 Configure optional dependency groups**
   - Create `flask` extra: flask, flask-cors, flask-restful
   - Create `async` extra: httpx, aiofiles (or anyio)
@@ -46,56 +59,12 @@
 
 ### Phase 2: Async Implementation
 
-- [x] **2.2 Design AsyncOAuthToolkit class API**
-  - Created `oatk/async_toolkit.py` module with AsyncOAuthToolkit class
-  - Mirrored OAuthToolkit API for async operations
-  - Implemented `async using_provider()` method
-  - Implemented `async init_from_provider()` method using AsyncHttpClient
-  - Implemented `async with_jwks()` with async file I/O using anyio
-  - Implemented `async with_private()` and `async with_public()` methods
-  - Implemented `async from_file()` method
-  - Created comprehensive test suite with pytest-asyncio
-  - Exported AsyncOAuthToolkit from main module
-  - Added anyio to async dependencies in pyproject.toml
-
-- [x] **2.3 Implement async token operations**
-  - Implemented `async validate()` method using anyio.to_thread.run_sync()
-  - Token generation remains sync (CPU-bound property)
-  - Token decode remains sync (CPU-bound operation)
-  - All async operations properly use await
-  - Tests verify both sync and async operations
-
-- [x] **2.4 Create async decorators**
-  - Created framework-agnostic async decorators
-  - Added context-based token management using contextvars
-  - Added `@authenticated` and `@authenticated_with_claims` decorators
-  - Support both sync and async functions
-  - All 29 tests passing (1 skipped for implementation issue)
-
-**Note:** Tasks 2.1-2.4 complete. Test infrastructure comprehensive: 76 async tests passing.
-
-- [x] **2.5 Add Quart integration**
-  - Created `oatk/quart.py` module
-  - Implemented `quart_authenticated` decorator (extracts token from quart.request)
-  - Implemented `quart_authenticated_with_claims` decorator (with claims validation)
-  - Added `quart` optional dependency group in pyproject.toml
-  - Created `examples/quart_example.py` with full working example
-  - Created `tests/test_quart.py` with comprehensive test suite
-  - Both decorators maintain compatibility with Flask decorator pattern
-  - Token extraction is automatic from `quart.request.headers["Authorization"]`
-
 - [ ] **2.6 Add FastAPI dependency injection**
   - Create `oatk/fastapi.py` module
   - Implement `OAuthToolkitDependency` class
   - Create `get_current_user` dependency
   - Create `require_claims` dependency
   - Add example in `examples/fastapi_example.py`
-
-- [x] **2.7 Update __init__.py exports**
-  - AsyncOAuthToolkit already exported from main module
-  - `__all__` list controls exports
-  - Both OAuthToolkit and AsyncOAuthToolkit available
-  - All type definitions exported (ClaimsDict, JWKSDict, etc.)
 
 - [ ] **2.8 Write async unit tests**
   - Create `tests/test_async_toolkit.py`
@@ -109,6 +78,15 @@
   - Create `tests/integration/test_fastapi.py`
   - Test async decorator with actual ASGI server
   - Use `httpx` async client for testing
+
+- [ ] **2.10 Create Makefile targets for async examples**
+  - Add target for `quart_example.py` (similar to existing `app` and `api` targets)
+  - Add target for `fastapi_example.py`
+  - Document new targets in README or Makefile comments
+  - Ensure targets use appropriate ASGI server (uvicorn or hypercorn)
+  - Add targets to `test-all` if applicable
+
+  **Note:** Examples already exist at `examples/quart_example.py` and `examples/fastapi_example.py`. This task creates convenient run targets.
 
 ### Phase 3: Testing & Documentation
 
@@ -157,23 +135,21 @@
   - Document breaking changes (none expected)
   - Document new dependencies required
 
-- [x] **3.7 Update README with async documentation**
-  - README.md created with quick start guide
-  - Installation documented with extras: `pip install oatk[async]`
-  - Sync and async examples included
-  - Framework integrations documented (Flask, Quart, FastAPI)
-  - Security disclaimer prominently displayed
+- [ ] **3.9 Merge .github/README.md into documentation**
+  - Review comprehensive documentation in `.github/README.md`
+  - Extract visual quick intro section with screenshots
+  - Add visual intro to main README.md (after current quick start)
+  - Create full documentation structure in `docs/` directory
+  - Move detailed content from `.github/README.md` to appropriate docs:
+    - CLI usage guide
+    - Module usage guide
+    - Fake server documentation
+    - Google OAuth example
+  - Preserve all screenshot images from `.github/README.md`
+  - Update links in documentation to reference new locations
+  - Consider keeping `.github/README.md` as GitHub-specific content
 
-- [x] **3.8 Set up CI/CD pipeline**
-  - Created `.github/workflows/test.yml` with multi-Python testing
-  - Tests run on Python 3.9, 3.10, 3.11, 3.12, 3.13
-  - Linting with ruff configured
-  - Type checking with mypy configured
-  - Security audit with pip-audit included
-  - Coverage upload to Codecov configured
-  - Documentation build workflow included
-  - Created `.github/workflows/publish.yml` for PyPI publishing
-  - Created `.readthedocs.yaml` for ReadTheDocs integration
+  **Note:** `.github/README.md` contains valuable visual walkthroughs with screenshots in `media/` directory. The content should be preserved in user-facing documentation.
 
 ### Phase 4: Release Preparation
 
@@ -211,6 +187,32 @@
   - Create GitHub release notes
   - Update any related repositories
   - Announce in relevant channels
+
+### Phase 5: Source Layout Migration (Future)
+
+- [ ] **5.1 Migrate to src/ layout**
+  - Create `src/oatk/` directory
+  - Move all source files from `oatk/` to `src/oatk/`
+  - Update `pyproject.toml` package discovery
+  - Update all import statements in tests
+  - Update all import statements in examples
+  - Update all import statements in documentation
+  - Update Makefile paths
+  - Update CI/CD paths if needed
+  - Test package installation with `uv pip install -e .`
+  - Verify all tests pass with new layout
+
+  **Note:** This is a breaking change for local development. The src/ layout is recommended for libraries to prevent import conflicts during testing. This should be done in a major version bump or early in development before widespread adoption.
+
+  **Priority:** P3-Medium - Best practice but not critical for current functionality
+
+  **Dependencies:** None - can be done independently
+
+- [ ] **5.2 Update documentation for src/ layout**
+  - Update README.md installation instructions if needed
+  - Update developer documentation
+  - Update example code snippets
+  - Verify documentation builds correctly
 
 ## Done
 
@@ -261,6 +263,16 @@
   - Documented [0.1.5] initial release
   - Follows Keep a Changelog format
 
+- [x] **1.11 Investigate MANIFEST.in necessity for uv-based builds**
+  - Researched hatchling package data handling and MANIFEST.in usage
+  - Confirmed MANIFEST.in is setuptools-specific and NOT used by hatchling
+  - Verified all package data files are already inside package directory
+  - Documented findings in `analysis/manifest-investigation.md`
+  - **Decision:** Remove MANIFEST.in - it has no effect on hatchling builds
+  - **Rationale:** Hatchling automatically includes all files in package directory that are not ignored by .gitignore
+  - **Action Required:** Update .gitignore with comprehensive Python exclusions (`__pycache__/`, `*.py[cod]`), then remove MANIFEST.in
+  - No pyproject.toml configuration needed - default behavior is sufficient
+
 **Phase 1 Complete: Infrastructure Modernization**
 
 ### Phase 2: Async Implementation
@@ -272,3 +284,67 @@
   - Created comprehensive test suite (19 tests, all passing)
   - Added pytest-httpx to dev dependencies
   - Verified: module imports successfully, all tests pass
+
+- [x] **2.2 Design AsyncOAuthToolkit class API**
+  - Created `oatk/async_toolkit.py` module with AsyncOAuthToolkit class
+  - Mirrored OAuthToolkit API for async operations
+  - Implemented `async using_provider()` method
+  - Implemented `async init_from_provider()` method using AsyncHttpClient
+  - Implemented `async with_jwks()` with async file I/O using anyio
+  - Implemented `async with_private()` and `async with_public()` methods
+  - Implemented `async from_file()` method
+  - Created comprehensive test suite with pytest-asyncio
+  - Exported AsyncOAuthToolkit from main module
+  - Added anyio to async dependencies in pyproject.toml
+
+- [x] **2.3 Implement async token operations**
+  - Implemented `async validate()` method using anyio.to_thread.run_sync()
+  - Token generation remains sync (CPU-bound property)
+  - Token decode remains sync (CPU-bound operation)
+  - All async operations properly use await
+  - Tests verify both sync and async operations
+
+- [x] **2.4 Create async decorators**
+  - Created framework-agnostic async decorators
+  - Added context-based token management using contextvars
+  - Added `@authenticated` and `@authenticated_with_claims` decorators
+  - Support both sync and async functions
+  - All 29 tests passing (1 skipped for implementation issue)
+
+**Note:** Tasks 2.1-2.4 complete. Test infrastructure comprehensive: 76 async tests passing.
+
+- [x] **2.5 Add Quart integration**
+  - Created `oatk/quart.py` module
+  - Implemented `quart_authenticated` decorator (extracts token from quart.request)
+  - Implemented `quart_authenticated_with_claims` decorator (with claims validation)
+  - Added `quart` optional dependency group in pyproject.toml
+  - Created `examples/quart_example.py` with full working example
+  - Created `tests/test_quart.py` with comprehensive test suite
+  - Both decorators maintain compatibility with Flask decorator pattern
+  - Token extraction is automatic from `quart.request.headers["Authorization"]`
+
+- [x] **2.7 Update __init__.py exports**
+  - AsyncOAuthToolkit already exported from main module
+  - `__all__` list controls exports
+  - Both OAuthToolkit and AsyncOAuthToolkit available
+  - All type definitions exported (ClaimsDict, JWKSDict, etc.)
+
+### Phase 3: Testing & Documentation
+
+- [x] **3.7 Update README with async documentation**
+  - README.md created with quick start guide
+  - Installation documented with extras: `pip install oatk[async]`
+  - Sync and async examples included
+  - Framework integrations documented (Flask, Quart, FastAPI)
+  - Security disclaimer prominently displayed
+
+- [x] **3.8 Set up CI/CD pipeline**
+  - Created `.github/workflows/test.yml` with multi-Python testing
+  - Tests run on Python 3.9, 3.10, 3.11, 3.12, 3.13
+  - Linting with ruff configured
+  - Type checking with mypy configured
+  - Security audit with pip-audit included
+  - Coverage upload to Codecov configured
+  - Documentation build workflow included
+  - Created `.github/workflows/publish.yml` for PyPI publishing
+  - Created `.readthedocs.yaml` for ReadTheDocs integration

@@ -13,3 +13,5 @@ local
 certs.json
 token.txt
 *.local
+__pycache__/
+*.py[cod]
