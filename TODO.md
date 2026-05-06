@@ -4,44 +4,6 @@
 
 ### Phase 1: Infrastructure Modernization
 
-- [ ] **1.12 Standardize project setup across repositories** ⚠️ **RESEARCH COMPLETE - AWAITING APPROVAL**
-  - [x] Review ../yoker project setup (Makefile, uv, GitHub, docs, testing, style, checking, pyproject.toml, README)
-  - [x] Review /python-project standard documentation (not found - will create)
-  - [x] Compare with current oatk setup
-  - [x] Identify best practices from each source
-  - [x] Document recommended standard in /python-project (to be created)
-  - [x] Present proposed changes to user for approval before application
-  - [ ] Apply approved changes to oatk project
-
-  **Research Deliverables:**
-  - `research/2026-05-06-project-setup-standardization/README.md` - Comprehensive research report
-  - `research/2026-05-06-project-setup-standardization/SOURCES.md` - Source provenance
-  - `analysis/project-setup-comparison.md` - Side-by-side comparison table
-  - `analysis/setup-standardization-recommendations.md` - Actionable recommendations
-
-  **Key Findings:**
-  - yoker has GitHub Actions CI/CD (oatk has none) - HIGH PRIORITY
-  - yoker uses src/ layout (best practice) vs oatk flat layout - MEDIUM PRIORITY
-  - yoker has extensive CLAUDE.md (317 lines) - oatk lacks project guide - HIGH PRIORITY
-  - Both use uv, ruff, mypy, tox with similar configs
-  - yoker has better Makefile with help target and convenience features - HIGH PRIORITY
-  - oatk has pytest/tox config bug (references yoker instead of oatk) - FIX IMMEDIATELY
-
-  **Recommendations Presented for Approval:**
-  1. Add GitHub Actions CI/CD (1-2 hours) - HIGH PRIORITY
-  2. Add CLAUDE.md or AGENTS.md (2-3 hours) - HIGH PRIORITY
-  3. Fix pytest/tox configuration (5 minutes) - IMMEDIATE
-  4. Add .python-version file (1 minute) - IMMEDIATE
-  5. Improve Makefile with help and convenience targets (1 hour) - HIGH PRIORITY
-  6. Enhance .gitignore (15 minutes) - HIGH PRIORITY
-  7. Migrate to src/ layout (2-4 hours) - MEDIUM PRIORITY
-  8. Add more badges (15 minutes) - MEDIUM PRIORITY
-  9. Add examples directory (2-3 hours) - MEDIUM PRIORITY
-
-  **Status:** Research phase complete. Implementation awaits user approval.
-
-  **Priority:** P2-High - Standardization should be done early to avoid rework
-
 - [ ] **1.2 Configure optional dependency groups**
   - Create `flask` extra: flask, flask-cors, flask-restful
   - Create `async` extra: httpx, aiofiles (or anyio)
@@ -297,6 +259,18 @@
   - **Rationale:** Hatchling automatically includes all files in package directory that are not ignored by .gitignore
   - **Action Required:** Update .gitignore with comprehensive Python exclusions (`__pycache__/`, `*.py[cod]`), then remove MANIFEST.in
   - No pyproject.toml configuration needed - default behavior is sufficient
+
+- [x] **1.12 Standardize project setup across repositories**
+  - Researched and compared project setups from yoker, oatk, and C3 harness
+  - Created comprehensive comparison: `analysis/project-setup-comparison.md`
+  - Created actionable recommendations: `analysis/setup-standardization-recommendations.md`
+  - **Quick Fixes:** Fixed pytest/tox coverage bug (yoker -> oatk), updated .python-version to 3.12
+  - **Infrastructure:** Improved Makefile with help target, sections, convenience targets
+  - **Documentation:** Added CLAUDE.md comprehensive project guide, added README badges
+  - **Migration:** Migrated from flat layout to src/ layout (modern best practice)
+  - Updated all configuration files (pyproject.toml, Makefile, GitHub Actions)
+  - All 111 tests pass, linting passes, type checking passes
+  - Summary: `reporting/task-1.12/summary.md`
 
 **Phase 1 Complete: Infrastructure Modernization**
 
