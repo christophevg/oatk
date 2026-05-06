@@ -2,7 +2,8 @@
 
 .PHONY: install sync test test-all test-file test-one \
         typecheck lint format format-check check build publish \
-        publish-test clean clean-all help
+        publish-test clean clean-all help \
+        quart-example fastapi-example
 
 # colors
 
@@ -101,6 +102,16 @@ clean: ## Remove build artifacts and backup files
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 clean-all: clean dist-clean clean-venv ## Deep clean (removes venv, build artifacts, caches)
+
+## Examples
+
+quart-example: ## Run Quart async OAuth example with auto-reload
+	@echo "👷‍♂️ $(BLUE)running Quart example$(NC)"
+	uv run hypercorn examples.quart_example:app --reload
+
+fastapi-example: ## Run FastAPI async OAuth example with auto-reload
+	@echo "👷‍♂️ $(BLUE)running FastAPI example$(NC)"
+	uv run uvicorn examples.fastapi_example:app --reload
 
 ## Help
 

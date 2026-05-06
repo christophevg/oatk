@@ -66,15 +66,6 @@
   - Test async decorator with actual ASGI server
   - Use `httpx` async client for testing
 
-- [ ] **2.10 Create Makefile targets for async examples**
-  - Add target for `quart_example.py` (similar to existing `app` and `api` targets)
-  - Add target for `fastapi_example.py`
-  - Document new targets in README or Makefile comments
-  - Ensure targets use appropriate ASGI server (uvicorn or hypercorn)
-  - Add targets to `test-all` if applicable
-
-  **Note:** Examples already exist at `examples/quart_example.py` and `examples/fastapi_example.py`. This task creates convenient run targets.
-
 ### Phase 3: Testing & Documentation
 
 - [ ] **3.1 Achieve 80% test coverage for sync code**
@@ -321,6 +312,18 @@
   - Created `tests/test_quart.py` with comprehensive test suite
   - Both decorators maintain compatibility with Flask decorator pattern
   - Token extraction is automatic from `quart.request.headers["Authorization"]`
+
+- [x] **2.10 Create Makefile targets for async examples**
+  - Created `quart-example` Makefile target using hypercorn ASGI server
+  - Created `fastapi-example` Makefile target using uvicorn ASGI server
+  - Both targets use `--reload` flag for development mode
+  - Added targets to .PHONY declaration
+  - Documented targets with `##` comments for help system
+  - Updated README with "Running Examples" section
+  - Added hypercorn to pyproject.toml dependencies
+  - Added uvicorn to pyproject.toml dependencies
+  - Targets appear in `make help` output
+  - Summary: `reporting/task-2.10/summary.md`
 
 - [x] **2.7 Update __init__.py exports**
   - AsyncOAuthToolkit already exported from main module

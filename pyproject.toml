@@ -48,7 +48,9 @@ all = [
   "httpx",
   "anyio",
   "quart",
+  "hypercorn",
   "fastapi",
+  "uvicorn",
 ]
 dev = [
   "pytest",
@@ -71,11 +73,13 @@ async = [
 ]
 quart = [
   "quart",
+  "hypercorn",
   "httpx",
   "anyio",
 ]
 fastapi = [
   "fastapi",
+  "uvicorn",
   "httpx",
   "anyio",
 ]

@@ -158,6 +158,32 @@ Decode a token (without validation):
 oatk from_file token.txt decode
 ```
 
+## Running Examples
+
+The repository includes example applications demonstrating framework integrations. Use the Makefile targets to run them:
+
+### Quart Example (Async Flask)
+
+```bash
+make quart-example
+```
+
+This runs the Quart async OAuth example with auto-reload enabled. See `examples/quart_example.py`.
+
+### FastAPI Example
+
+```bash
+make fastapi-example
+```
+
+This runs the FastAPI async OAuth example with auto-reload enabled. See `examples/fastapi_example.py`.
+
+Both examples demonstrate:
+- OAuth toolkit initialization and configuration
+- Token validation in route decorators
+- Role-based access control
+- Claim-based authorization
+
 ## Documentation
 
 Full documentation is available at: https://oatk.readthedocs.io
