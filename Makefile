@@ -50,11 +50,11 @@ test-one: ## Run specific test (usage: make test-one TEST=tests/test_x.py::test_
 
 pytest: ## Run tests with pytest
 	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
-	@uv run --extra dev pytest -v
+	@uv run --extra all pytest -v
 
 coverage: ## Run tests with coverage reporting
 	@echo "👷‍♂️ $(BLUE)running tests with coverage$(NC)"
-	@uv run --extra dev pytest --cov=src --cov-report=term --cov-report=html --cov-report=lcov
+	@uv run --extra all pytest --cov=src --cov-report=term --cov-report=html --cov-report=lcov
 
 ## Code Quality
 
@@ -105,13 +105,28 @@ clean-all: clean dist-clean clean-venv ## Deep clean (removes venv, build artifa
 
 ## Examples
 
-quart-example: ## Run Quart async OAuth example with auto-reload
-	@echo "👷‍♂️ $(BLUE)running Quart example$(NC)"
-	uv run hypercorn examples.quart_example:app --reload
+quart-example: ## Run Quart OAuth example with automated curl tests
+	./examples/quart_test.sh
 
-fastapi-example: ## Run FastAPI async OAuth example with auto-reload
-	@echo "👷‍♂️ $(BLUE)running FastAPI example$(NC)"
-	uv run uvicorn examples.fastapi_example:app --reload
+quart-server: ## Start Quart OAuth example server for manual testing
+	@echo "👷‍♂️ $(BLUE)starting Quart server (for manual testing)$(NC)"
+	@echo "Server will be available at http://localhost:8000"
+	@echo "Press Ctrl+C to stop"
+	uv run uvicorn examples.quart_example:app --reload --port 8000
+
+fastapi-example: ## Run FastAPI OAuth example automated test suite
+	@echo "👷‍♂️ $(BLUE)running FastAPI example tests$(NC)"
+	@echo "FastAPI example does not yet have automated tests"
+	@echo "Starting server for manual testing instead..."
+	@echo "Server will be available at http://localhost:8001"
+	@echo "Press Ctrl+C to stop"
+	uv run uvicorn examples.fastapi_example:app --reload --port 8001
+
+fastapi-server: ## Start FastAPI OAuth example server for manual testing
+	@echo "👷‍♂️ $(BLUE)starting FastAPI server (for manual testing)$(NC)"
+	@echo "Server will be available at http://localhost:8001"
+	@echo "Press Ctrl+C to stop"
+	uv run uvicorn examples.fastapi_example:app --reload --port 8001
 
 ## Help
 

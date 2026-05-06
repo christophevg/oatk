@@ -135,6 +135,7 @@ class AsyncOAuthToolkit:
     self._public_key = serialization.load_pem_public_key(
       key_data, backend=default_backend()
     )
+
     self._certs = {self._kid: self._public_key}
     self._log_certs("certs set from path to")
     return self
