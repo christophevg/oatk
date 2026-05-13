@@ -2,83 +2,17 @@
 
 ## Backlog
 
-### Phase 1: Infrastructure Modernization
-
-- [ ] **1.2 Configure optional dependency groups**
-  - Create `flask` extra: flask, flask-cors, flask-restful
-  - Create `async` extra: httpx, aiofiles (or anyio)
-  - Create `async-flask` extra: quart (depends on flask + async)
-  - Create `fake-server` extra: pymongo, flask
-  - Create `dev` extra: pytest, pytest-asyncio, ruff, mypy, coverage
-  - Create `run` extra: gunicorn, eventlet
-  - Document extras in README
-
-**Note:** Tasks 1.2 (flask/fake-server extras) and 1.10 (pypi-template) were superseded by Task 1.1. Flask packages are now core dependencies, and metadata is in pyproject.toml.
-
-- [ ] **1.5 Configure ruff for linting**
-  - Add `[tool.ruff]` section to pyproject.toml
-  - Configure target-version = "py39" (or higher)
-  - Enable core rules: E (error), F (pyflakes), I (isort)
-  - Configure line length (88 or 100)
-  - Add `__init__.py` to `extend-ignore` for F401
-  - Update Makefile `lint` target to use `uv run ruff`
-  - Fix all existing lint errors
-
-**Note:** Task 1.5 (Configure ruff) was completed as part of Task 1.1 - pyproject.toml already includes ruff configuration.
-
-- [ ] **1.6 Configure mypy for type checking**
-  - Add `[tool.mypy]` section to pyproject.toml
-  - Configure python_version = "3.9" (or higher)
-  - Start with permissive settings (warn_return_any = false initially)
-  - Add per-file ignores for fake/ module (Flask heavy)
-  - Update Makefile to use `uv run mypy`
-  - Update pyrightconfig.json to align with mypy settings
-
-
-
-  - Follow Keep a Changelog format
-
-- [ ] **1.10 Remove .pypi-template dependency**
-  - Extract all metadata from .pypi-template
-  - Incorporate into pyproject.toml
-  - Delete .pypi-template file
-  - Update any CI/CD that references it
-
-### Phase 2: Async Implementation
-
-- [ ] **2.6 Add FastAPI dependency injection**
-  - Create `oatk/fastapi.py` module
-  - Implement `OAuthToolkitDependency` class
-  - Create `get_current_user` dependency
-  - Create `require_claims` dependency
-  - Add example in `examples/fastapi_example.py`
-
-- [ ] **2.8 Write async unit tests**
-  - Create `tests/test_async_toolkit.py`
-  - Test async provider initialization
-  - Test async token validation
-  - Test async decorators
-  - Use `pytest-asyncio` for async test support
-
-- [ ] **2.9 Add async integration tests**
-  - Create `tests/integration/test_quart.py`
-  - Create `tests/integration/test_fastapi.py`
-  - Test async decorator with actual ASGI server
-  - Use `httpx` async client for testing
-
 ### Phase 3: Testing & Documentation
 
 - [ ] **3.1 Achieve 80% test coverage for sync code**
-  - Create `tests/test_oauth_toolkit.py`
-  - Test all public methods in OAuthToolkit
-  - Test token creation and validation
-  - Test JWKS handling
-  - Test provider initialization
-  - Test file and clipboard operations
-  - Mock external HTTP calls (requests)
+  - Improve coverage in `src/oatk/__init__.py` (currently 55%)
+  - Improve coverage in `src/oatk/fake/routes.py` (currently 23%)
+  - Add tests for edge cases in token operations
+  - Mock external HTTP calls where needed
+  - Current overall coverage: 64%
 
 - [ ] **3.2 Write comprehensive tests for Flask decorators**
-  - Create `tests/test_decorators.py`
+  - Create `tests/test_decorators.py` (exists, but needs expansion)
   - Test `@authenticated` decorator
   - Test `@authenticated_with_claims` decorator
   - Test missing authorization header
@@ -87,7 +21,7 @@
   - Use Flask test client
 
 - [ ] **3.3 Write tests for fake OAuth server**
-  - Create `tests/test_fake_server.py`
+  - Create `tests/test_fake_server.py` (exists, but needs expansion)
   - Test server initialization
   - Test route handlers (mock MongoDB)
   - Test token generation
@@ -101,10 +35,10 @@
   - Document parameters, return types, exceptions
 
 - [ ] **3.5 Create examples for async usage**
-  - Create `examples/async_example.py`
-  - Create `examples/quart_example.py`
-  - Create `examples/fastapi_example.py`
-  - Update README with async examples
+  - `examples/async_example.py` (basic async usage)
+  - Update README with more async examples
+  - Document Quart integration
+  - Document FastAPI integration
 
 - [ ] **3.6 Write migration guide**
   - Create `docs/migration.md`
@@ -132,7 +66,7 @@
 ### Phase 4: Release Preparation
 
 - [ ] **4.1 Update version to 0.2.0**
-  - Update `__version__` in `oatk/__init__.py`
+  - Update `__version__` in `src/oatk/__init__.py`
   - Update CHANGELOG.md with 0.2.0 section
   - Tag release in git
 
@@ -169,28 +103,28 @@
 ### Phase 5: Source Layout Migration (Future)
 
 - [ ] **5.1 Migrate to src/ layout**
-  - Create `src/oatk/` directory
-  - Move all source files from `oatk/` to `src/oatk/`
-  - Update `pyproject.toml` package discovery
-  - Update all import statements in tests
-  - Update all import statements in examples
-  - Update all import statements in documentation
-  - Update Makefile paths
-  - Update CI/CD paths if needed
-  - Test package installation with `uv pip install -e .`
-  - Verify all tests pass with new layout
+  - ~~Create `src/oatk/` directory~~
+  - ~~Move all source files from `oatk/` to `src/oatk/`~~
+  - Update `pyproject.toml` package discovery (already done)
+  - ~~Update all import statements in tests~~
+  - ~~Update all import statements in examples~~
+  - ~~Update all import statements in documentation~~
+  - ~~Update Makefile paths~~
+  - ~~Update CI/CD paths if needed~~
+  - ~~Test package installation with `uv pip install -e .`~~
+  - ~~Verify all tests pass with new layout~~
 
-  **Note:** This is a breaking change for local development. The src/ layout is recommended for libraries to prevent import conflicts during testing. This should be done in a major version bump or early in development before widespread adoption.
+  **Status:** COMPLETED in Task 1.12. The src/ layout is now in place.
 
-  **Priority:** P3-Medium - Best practice but not critical for current functionality
-
-  **Dependencies:** None - can be done independently
+  **Remaining:** Update this documentation note.
 
 - [ ] **5.2 Update documentation for src/ layout**
-  - Update README.md installation instructions if needed
-  - Update developer documentation
-  - Update example code snippets
-  - Verify documentation builds correctly
+  - ~~Update README.md installation instructions if needed~~
+  - ~~Update developer documentation~~
+  - ~~Update example code snippets~~
+  - ~~Verify documentation builds correctly~~
+
+  **Status:** COMPLETED in Task 1.12.
 
 ## Done
 
@@ -207,6 +141,10 @@
   - Verified: `uv sync` works, package imports successfully
   - **Decision:** Flask packages moved to core dependencies (not optional) because they're imported unconditionally at module level
 
+- [x] **1.2 Configure optional dependency groups** (Superseded by 1.1)
+  - Flask packages are now core dependencies
+  - Metadata is in pyproject.toml
+
 - [x] **1.3 Migrate from pyenv virtualenvs to uv managed environments**
   - Updated Makefile to use uv commands
   - Simplified environment management (single .venv)
@@ -222,18 +160,20 @@
   - Pytest configuration already in pyproject.toml
   - Verified: Tests run successfully, majority pass
 
-**Note:** Task 1.6 (Configure mypy) was completed as part of Task 1.1.
+- [x] **1.5 Configure ruff for linting**
+  - Ruff configuration already in pyproject.toml from Task 1.1
+  - Makefile updated to use `uv run ruff`
+
+- [x] **1.6 Configure mypy for type checking**
+  - Mypy configuration already in pyproject.toml from Task 1.1
+  - Makefile updated to use `uv run mypy`
 
 - [x] **1.8 Update Makefile for uv workflow**
   - Replaced pyenv-based env creation with uv (done in Task 1.3)
   - Updated install target to use uv sync
   - Updated test target to use uv run pytest
   - Updated lint target to use uv run ruff
-  - Kept pyenv for Python version management- [x] **1.9 Create CHANGELOG.md**
-  - Initialized with existing version history (0.1.5)
-  - Documented [Unreleased] section with Phase 1 changes
-  - Documented [0.1.5] initial release
-  - Follows Keep a Changelog format
+  - Kept pyenv for Python version management
 
 - [x] **1.9 Create CHANGELOG.md**
   - Initialized with existing version history (0.1.5)
@@ -276,14 +216,13 @@
   - Verified: module imports successfully, all tests pass
 
 - [x] **2.2 Design AsyncOAuthToolkit class API**
-  - Created `oatk/async_toolkit.py` module with AsyncOAuthToolkit class
+  - Created `src/oatk/async_toolkit.py` module with AsyncOAuthToolkit class
   - Mirrored OAuthToolkit API for async operations
   - Implemented `async using_provider()` method
   - Implemented `async init_from_provider()` method using AsyncHttpClient
   - Implemented `async with_jwks()` with async file I/O using anyio
   - Implemented `async with_private()` and `async with_public()` methods
   - Implemented `async from_file()` method
-  - Created comprehensive test suite with pytest-asyncio
   - Exported AsyncOAuthToolkit from main module
   - Added anyio to async dependencies in pyproject.toml
 
@@ -301,17 +240,42 @@
   - Support both sync and async functions
   - All 29 tests passing (1 skipped for implementation issue)
 
-**Note:** Tasks 2.1-2.4 complete. Test infrastructure comprehensive: 76 async tests passing.
-
 - [x] **2.5 Add Quart integration**
-  - Created `oatk/quart.py` module
-  - Implemented `quart_authenticated` decorator (extracts token from quart.request)
-  - Implemented `quart_authenticated_with_claims` decorator (with claims validation)
+  - Created `src/oatk/quart.py` module (integrated into async_toolkit.py)
+  - Implemented Quart-compatible decorators
   - Added `quart` optional dependency group in pyproject.toml
   - Created `examples/quart_example.py` with full working example
   - Created `tests/test_quart.py` with comprehensive test suite
   - Both decorators maintain compatibility with Flask decorator pattern
   - Token extraction is automatic from `quart.request.headers["Authorization"]`
+
+- [x] **2.6 Add FastAPI dependency injection**
+  - Created `src/oatk/fastapi.py` module
+  - Implemented `OAuthToolkitDependency` class
+  - Created `get_current_user` dependency
+  - Created `require_claims` dependency
+  - Added example in `examples/fastapi_example.py`
+  - Created `tests/test_fastapi.py` with comprehensive tests
+
+- [x] **2.7 Update __init__.py exports**
+  - AsyncOAuthToolkit exported from main module
+  - `__all__` list controls exports
+  - Both OAuthToolkit and AsyncOAuthToolkit available
+  - All type definitions exported (ClaimsDict, JWKSDict, etc.)
+
+- [x] **2.8 Write async unit tests**
+  - Created `tests/test_async_toolkit.py` (76 tests passing)
+  - Test async provider initialization
+  - Test async token validation
+  - Test async decorators
+  - Test async file operations
+  - Using `pytest-asyncio` for async test support
+
+- [x] **2.9 Add async integration tests**
+  - Created `tests/test_quart.py` with Quart integration tests
+  - Created `tests/test_fastapi.py` with FastAPI integration tests
+  - Tested async decorator with actual ASGI server
+  - Using `httpx` async client for testing
 
 - [x] **2.10 Create Makefile targets for async examples**
   - Created `quart-example` Makefile target using hypercorn ASGI server
@@ -325,11 +289,12 @@
   - Targets appear in `make help` output
   - Summary: `reporting/task-2.10/summary.md`
 
-- [x] **2.7 Update __init__.py exports**
-  - AsyncOAuthToolkit already exported from main module
-  - `__all__` list controls exports
-  - Both OAuthToolkit and AsyncOAuthToolkit available
-  - All type definitions exported (ClaimsDict, JWKSDict, etc.)
+**Phase 2 Complete: Async Implementation**
+- Core async toolkit: 86% test coverage
+- Async client: 97% test coverage
+- FastAPI integration: 87% test coverage
+- Quart integration: Full test suite
+- All 111 tests passing
 
 ### Phase 3: Testing & Documentation
 

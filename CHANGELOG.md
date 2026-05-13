@@ -5,29 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2025-05-13
 
 ### Added
 
-- Type hints to entire codebase for better IDE support and type checking
-- Comprehensive test infrastructure with pytest
-- Modern uv-based project setup with pyproject.toml
-- Type aliases in oatk/types.py (ClaimsDict, JWKSDict, Decorator, etc.)
+- **AsyncOAuthToolkit** - Full async support with awaitable methods
+- **Async HTTP client** - httpx-based async HTTP operations
+- **FastAPI integration** - Dependency injection with `OAuthToolkitDependency`
+- **Quart integration** - Async decorators for Quart framework
+- **Context-based token management** - Using contextvars for async routes
+- **Type hints** - Complete type annotations throughout codebase
+- **Test infrastructure** - Comprehensive pytest suite (111 tests)
+- **CI/CD pipeline** - GitHub Actions for testing and publishing
+- **ReadTheDocs configuration** - Documentation hosting setup
 
 ### Changed
 
-- Migrated from setup.py to pyproject.toml (PEP 621 compliant)
-- Migrated from pyenv virtualenvs to uv managed environments
-- Updated Makefile to use uv commands
-- Flask packages are now core dependencies (not optional)
+- **Packaging** - Migrated from setup.py to pyproject.toml (PEP 621)
+- **Project layout** - Migrated from flat layout to src/ layout
+- **Development workflow** - Updated to uv-based environment management
+- **Dependencies** - Flask packages now core dependencies
+- **Python version** - Minimum version updated to 3.10+
+
+### Fixed
+
+- Async decorator context handling
+- Quart example async initialization
 
 ### Development
 
-- Added mypy for type checking
-- Added ruff for linting
-- Added pytest for testing
-- Added coverage for test coverage reporting
-- Configured Python 3.9+ as minimum version
+- Added mypy for type checking (strict mode)
+- Added ruff for linting and formatting
+- Added pytest-cov for coverage reporting
+- Added tox for multi-version testing
+- Configured Python 3.10-3.13 support
 
 ## [0.1.5] - 2022-10-15
 
