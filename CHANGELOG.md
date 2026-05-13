@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-05-13
+
+### Fixed
+
+- **Package distribution** - Fixed hatchling configuration to include source files in wheel
+- Removed conflicting `sources` directive that prevented package installation
+
 ## [0.2.0] - 2025-05-13
 
 ### Added

@@ -96,9 +96,6 @@ Repository = "https://github.com/christophevg/oatk"
 [project.scripts]
 oatk = "oatk.__main__:cli"
 
-[tool.hatch.build]
-sources = ["src"]
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/oatk"]
 
