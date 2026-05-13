@@ -80,13 +80,13 @@ check: typecheck lint format-check ## Run all checks (typecheck, lint, format-ch
 
 build: dist ## Build package distributions
 
-publish-test: dist ## Build and publish to TestPyPI
-	@echo "👷‍♂️ $(BLUE)publishing to PyPI test$(NC)"
-	uv publish --repository testpypi
-
-publish: dist ## Build and publish to PyPI
+publish: dist ## Build and publish to PyPI (requires credentials)
 	@echo "👷‍♂️ $(BLUE)publishing to PyPI$(NC)"
-	uv publish
+	uv run twine upload dist/*
+
+publish-test: dist ## Build and publish to TestPyPI (requires credentials)
+	@echo "👷‍♂️ $(BLUE)publishing to TestPyPI$(NC)"
+	uv run twine upload --repository testpypi dist/*
 
 dist: dist-clean ## Build distributions
 	@echo "👷‍♂️ $(BLUE)building distribution$(NC)"
