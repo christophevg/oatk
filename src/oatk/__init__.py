@@ -68,9 +68,7 @@ class OAuthToolkit:
 
   def with_public(self, path: str) -> OAuthToolkit:
     with open(path, "rb") as fp:
-      self._public_key = serialization.load_pem_public_key(
-        fp.read(), backend=default_backend()
-      )
+      self._public_key = serialization.load_pem_public_key(fp.read(), backend=default_backend())
     self._certs = {self._kid: self._public_key}
     self._log_certs("certs set from path to")
     return self
@@ -117,8 +115,7 @@ class OAuthToolkit:
         jwks = path_or_string_or_obj
     assert isinstance(jwks, dict)
     self._certs = {
-      key["kid"]: jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
-      for key in jwks["keys"]
+      key["kid"]: jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key)) for key in jwks["keys"]
     }
     self._log_certs("certs set from jwks to")
 
@@ -145,9 +142,7 @@ class OAuthToolkit:
       token = self._encoded
     return jwt.get_unverified_header(token)
 
-  def claims(
-    self, claimsdict: ClaimsDict | None = None, **claimset: Any
-  ) -> OAuthToolkit:
+  def claims(self, claimsdict: ClaimsDict | None = None, **claimset: Any) -> OAuthToolkit:
     if claimsdict is None:
       claimsdict = {}
     self._claims = claimset
@@ -235,9 +230,7 @@ class OAuthToolkit:
 
     return wrapper
 
-  def authenticated_with_claims(
-    self, **required_claims: str | Callable[[Any], bool]
-  ) -> Decorator:
+  def authenticated_with_claims(self, **required_claims: str | Callable[[Any], bool]) -> Decorator:
     def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
       @wraps(f)
       def wrapper(*args: Any, **kwargs: Any) -> Any:

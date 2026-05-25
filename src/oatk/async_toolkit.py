@@ -132,9 +132,7 @@ class AsyncOAuthToolkit:
     async with await anyio.open_file(path, "rb") as fp:
       key_data = await fp.read()
 
-    self._public_key = serialization.load_pem_public_key(
-      key_data, backend=default_backend()
-    )
+    self._public_key = serialization.load_pem_public_key(key_data, backend=default_backend())
 
     self._certs = {self._kid: self._public_key}
     self._log_certs("certs set from path to")
@@ -228,9 +226,7 @@ class AsyncOAuthToolkit:
       indent=2,
     )
 
-  async def with_jwks(
-    self, path_or_string_or_obj: str | bytes | JWKSDict
-  ) -> AsyncOAuthToolkit:
+  async def with_jwks(self, path_or_string_or_obj: str | bytes | JWKSDict) -> AsyncOAuthToolkit:
     """
     Load JWKS from a file path, JSON string, or dictionary.
 
@@ -263,8 +259,7 @@ class AsyncOAuthToolkit:
 
     assert isinstance(jwks, dict)
     self._certs = {
-      key["kid"]: jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
-      for key in jwks["keys"]
+      key["kid"]: jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key)) for key in jwks["keys"]
     }
     self._log_certs("certs set from jwks to")
 
@@ -327,9 +322,7 @@ class AsyncOAuthToolkit:
     assert token is not None, "No token provided and no token loaded"
     return jwt.get_unverified_header(token)
 
-  def claims(
-    self, claimsdict: ClaimsDict | None = None, **claimset: Any
-  ) -> AsyncOAuthToolkit:
+  def claims(self, claimsdict: ClaimsDict | None = None, **claimset: Any) -> AsyncOAuthToolkit:
     """
     Set claims for token generation.
 

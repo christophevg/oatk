@@ -51,9 +51,7 @@ class TestQuartAuthenticated:
     assert result == {"message": "authenticated"}
 
   @pytest.mark.asyncio
-  async def test_quart_authenticated_missing_header(
-    self, private_key_file, public_key_file
-  ):
+  async def test_quart_authenticated_missing_header(self, private_key_file, public_key_file):
     """
     Given: A Quart route decorated with @toolkit.authenticated
     When: Request missing Authorization header
@@ -110,9 +108,7 @@ class TestQuartAuthenticated:
     assert result[1] == 403
 
   @pytest.mark.asyncio
-  async def test_quart_authenticated_preserves_metadata(
-    self, private_key_file, public_key_file
-  ):
+  async def test_quart_authenticated_preserves_metadata(self, private_key_file, public_key_file):
     """
     Given: A function decorated with @toolkit.authenticated
     When: Checking function metadata
@@ -328,9 +324,7 @@ class TestQuartAuthenticatedWithClaims:
 
     with patch("quart.request", mock_request):
 
-      @toolkit.authenticated_with_claims(
-        sub=sample_claims["sub"], iss=sample_claims["iss"]
-      )
+      @toolkit.authenticated_with_claims(sub=sample_claims["sub"], iss=sample_claims["iss"])
       async def protected_route():
         return {"message": "authenticated"}
 
@@ -343,9 +337,7 @@ class TestQuartIntegration:
   """Test integration with actual Quart app."""
 
   @pytest.mark.asyncio
-  async def test_with_quart_test_client(
-    self, private_key_file, public_key_file, sample_claims
-  ):
+  async def test_with_quart_test_client(self, private_key_file, public_key_file, sample_claims):
     """
     Given: A Quart app with protected routes
     When: Making requests with test client
@@ -386,17 +378,13 @@ class TestQuartIntegration:
       assert response.status_code == 401
 
       # Test with valid token
-      response = await client.get(
-        "/protected", headers={"Authorization": f"Bearer {token}"}
-      )
+      response = await client.get("/protected", headers={"Authorization": f"Bearer {token}"})
       assert response.status_code == 200
       data = await response.get_json()
       assert data["message"] == "authenticated"
 
       # Test admin route with matching claim
-      response = await client.get(
-        "/admin", headers={"Authorization": f"Bearer {token}"}
-      )
+      response = await client.get("/admin", headers={"Authorization": f"Bearer {token}"})
       assert response.status_code == 200
       data = await response.get_json()
       assert data["message"] == "admin access"
@@ -433,7 +421,5 @@ class TestQuartIntegration:
       return jsonify({"message": "ok"})
 
     async with app.test_client() as client:
-      response = await client.get(
-        "/protected", headers={"Authorization": f"Bearer {token}"}
-      )
+      response = await client.get("/protected", headers={"Authorization": f"Bearer {token}"})
       assert response.status_code == 200

@@ -57,9 +57,7 @@ def create_client() -> str:
     return redirect("/")
 
   if request.method == "GET":
-    return render_template(
-      "create_client.html", client_id=gen_salt(24), client_secret=gen_salt(48)
-    )
+    return render_template("create_client.html", client_id=gen_salt(24), client_secret=gen_salt(48))
 
   # POST
   form = request.form
@@ -156,9 +154,7 @@ def authorize() -> str:
 def issue_token() -> dict[str, Any]:
   try:
     code = db["codes"].find_one({"code": request.json["code"]})
-    client = db["clients"].find_one(
-      {"user_id": code["user_id"], "client_id": code["client_id"]}
-    )
+    client = db["clients"].find_one({"user_id": code["user_id"], "client_id": code["client_id"]})
     user = db["users"].find_one({"_id": code["user_id"]})
     username = user["username"]
 

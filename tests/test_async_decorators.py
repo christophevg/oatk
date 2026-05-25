@@ -155,9 +155,7 @@ class TestExecuteAuthenticated:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      result = await toolkit.execute_authenticated(
-        lambda: "success", {"sub": sample_claims["sub"]}
-      )
+      result = await toolkit.execute_authenticated(lambda: "success", {"sub": sample_claims["sub"]})
 
     assert result == "success"
 
@@ -184,9 +182,7 @@ class TestExecuteAuthenticated:
     mock_request.headers.get = MagicMock(return_value=f"Bearer {token}")
 
     with patch("quart.request", mock_request):
-      result = await toolkit.execute_authenticated(
-        lambda: "success", {"missing_claim": "value"}
-      )
+      result = await toolkit.execute_authenticated(lambda: "success", {"missing_claim": "value"})
 
     assert result[1] == 403
     assert "required claim" in result[0]

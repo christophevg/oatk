@@ -80,9 +80,7 @@ class TestAsyncOAuthToolkitKeyLoading:
     assert toolkit._kid in toolkit._certs, "Should add public key to certs"
 
   @pytest.mark.asyncio
-  async def test_with_private_chains_to_with_public(
-    self, private_key_file, public_key_file
-  ):
+  async def test_with_private_chains_to_with_public(self, private_key_file, public_key_file):
     """
     Given: An AsyncOAuthToolkit instance
     When: Chaining with_private() and with_public()
@@ -136,14 +134,10 @@ class TestAsyncOAuthToolkitProviderInit:
     )
 
     toolkit = AsyncOAuthToolkit()
-    result = await toolkit.using_provider(
-      "https://example.com/.well-known/openid-configuration"
-    )
+    result = await toolkit.using_provider("https://example.com/.well-known/openid-configuration")
 
     assert result is toolkit, "Should return self for method chaining"
-    assert (
-      toolkit._provider_url == "https://example.com/.well-known/openid-configuration"
-    )
+    assert toolkit._provider_url == "https://example.com/.well-known/openid-configuration"
     assert "test-key-id" in toolkit._certs, "Should load JWKS keys"
 
   @pytest.mark.asyncio
@@ -286,9 +280,7 @@ class TestAsyncOAuthToolkitToken:
   """Test AsyncOAuthToolkit token generation."""
 
   @pytest.mark.asyncio
-  async def test_token_generation_with_private_key(
-    self, private_key_file, public_key_file
-  ):
+  async def test_token_generation_with_private_key(self, private_key_file, public_key_file):
     """
     Given: An AsyncOAuthToolkit with private key and claims
     When: Accessing the token property
@@ -394,17 +386,13 @@ class TestAsyncOAuthToolkitValidation:
 
     # Create JWKS with the same kid
     jwks_dict = {
-      "keys": [
-        jwk.dumps(rsa_key_pair["public_key_obj"], kty="RSA", alg="RS256", kid=kid)
-      ]
+      "keys": [jwk.dumps(rsa_key_pair["public_key_obj"], kty="RSA", alg="RS256", kid=kid)]
     }
 
     # Validate with async toolkit using JWKS
     async_toolkit = AsyncOAuthToolkit()
     await async_toolkit.with_jwks(jwks_dict)
-    async_toolkit.with_client_id(
-      sample_claims.get("aud")
-    )  # Set audience for validation
+    async_toolkit.with_client_id(sample_claims.get("aud"))  # Set audience for validation
 
     validated = await async_toolkit.validate(token)
 
@@ -509,9 +497,7 @@ class TestAsyncOAuthToolkitMethodChaining:
   """Test AsyncOAuthToolkit method chaining pattern."""
 
   @pytest.mark.asyncio
-  async def test_chaining_multiple_methods(
-    self, private_key_file, public_key_file, sample_claims
-  ):
+  async def test_chaining_multiple_methods(self, private_key_file, public_key_file, sample_claims):
     """
     Given: An AsyncOAuthToolkit instance
     When: Chaining multiple methods

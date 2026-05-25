@@ -329,9 +329,7 @@ class TestAsyncHttpClientIntegration:
     )
 
     async with AsyncHttpClient() as client:
-      response = await client.get(
-        "https://example.com/.well-known/openid-configuration"
-      )
+      response = await client.get("https://example.com/.well-known/openid-configuration")
       config = response.json()
 
       assert config["issuer"] == "https://example.com", "Should parse issuer"

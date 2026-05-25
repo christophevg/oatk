@@ -421,12 +421,8 @@ class TestFastAPIIntegration:
     Then: Should authenticate and authorize correctly
     """
     toolkit = AsyncOAuthToolkit()
-    asyncio.get_event_loop().run_until_complete(
-      toolkit.with_private(str(private_key_file))
-    )
-    asyncio.get_event_loop().run_until_complete(
-      toolkit.with_public(str(public_key_file))
-    )
+    asyncio.get_event_loop().run_until_complete(toolkit.with_private(str(private_key_file)))
+    asyncio.get_event_loop().run_until_complete(toolkit.with_public(str(public_key_file)))
     toolkit.claims(
       sub="test-user",
       iss="https://test.example.com",
@@ -479,12 +475,8 @@ class TestFastAPIIntegration:
     Then: Should return 403
     """
     toolkit = AsyncOAuthToolkit()
-    asyncio.get_event_loop().run_until_complete(
-      toolkit.with_private(str(private_key_file))
-    )
-    asyncio.get_event_loop().run_until_complete(
-      toolkit.with_public(str(public_key_file))
-    )
+    asyncio.get_event_loop().run_until_complete(toolkit.with_private(str(private_key_file)))
+    asyncio.get_event_loop().run_until_complete(toolkit.with_public(str(public_key_file)))
     toolkit.claims(
       sub="test-user",
       iss="https://test.example.com",
