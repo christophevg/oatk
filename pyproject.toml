@@ -8,6 +8,7 @@ dynamic = ["version"]
 description = "A collection of useful functions for dealing with OAuth"
 readme = "README.md"
 license = "MIT"
+requires-python = ">=3.10"
 authors = [
   { name = "Christophe VG", email = "contact@christophe.vg" }
 ]
@@ -20,7 +21,6 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Development Status :: 4 - Beta",
 ]
-requires-python = ">=3.10"
 dependencies = [
   "pyjwt",
   "cryptography",
@@ -63,8 +63,10 @@ dev = [
   "twine",
 ]
 run = [
-  "gunicorn",
+  "gunicorn==25.3.0",
   "eventlet",
+  "anyio",
+  "httpx",
 ]
 async = [
   "httpx",
@@ -105,7 +107,7 @@ pattern = "__version__ = ['\"](?P<version>[^'\"]+)['\"]"
 
 [tool.ruff]
 target-version = "py310"
-line-length = 88
+line-length = 100
 indent-width = 2
 
 [tool.ruff.format]

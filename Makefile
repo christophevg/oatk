@@ -1,141 +1,113 @@
 -include ~/.claude/Makefile
 
-.PHONY: install sync test test-all test-file test-one \
-        typecheck lint format format-check check build publish \
-        publish-test clean clean-all help \
-        quart-example fastapi-example
+.PHONY: env-dev env-run install-pythons test test-cov test-all format lint typecheck check run docs docs-view build pre-publish publish publish-test clean clean-all help quart-example quart-server fastapi-example fastapi-server
 
-# colors
+## Environment
 
-GREEN=\033[0;32m
-RED=\033[0;31m
-BLUE=\033[0;34m
-NC=\033[0m
+env-dev: ## Install all dependencies (dev + docs)
+	uv sync --all-extras
 
-RUFF_PYTHON_VERSION ?= py311
+env-run: ## Install runtime dependencies only
+	uv sync --extra run
 
-## Setup
-
-install: ## Install package in development mode with all extras
-	@echo "👷‍♂️ $(BLUE)syncing dependencies with uv$(NC)"
-	@uv sync --all-extras
-
-uninstall: clean-venv ## Remove virtual environment
-
-clean-venv: ## Remove virtual environment
-	@echo "👷‍♂️ $(RED)removing .venv directory$(NC)"
-	@-rm -rf .venv
-
-reinstall: clean-venv install ## Clean install (removes venv and reinstalls)
-
-upgrade: ## Upgrade all packages to latest versions
-	@echo "👷‍♂️ $(BLUE)upgrading all packages$(NC)"
-	@uv sync --all-extras --upgrade
-
-sync: ## Sync dependencies from lock file
-	uv sync --frozen --all-extras
+install-pythons: ## Install Python 3.10, 3.11, 3.12
+	uv python install 3.10 3.11 3.12
 
 ## Testing
 
-test: format-check lint typecheck pytest ## Run all tests with coverage and checks
+test: env-dev ## Run tests (usage: make test / optional: TEST=file|file:test_name)
+	uv run pytest -v $(TEST)
 
-test-all: ## Run tests against all supported Python versions (3.10, 3.11, 3.12)
+test-cov: env-dev ## Run tests with coverage
+	uv run pytest --cov=src --cov-report=term-missing $(TEST)
+
+test-all: env-dev ## Run tests on all Python versions
 	uv run tox
-
-test-file: ## Run specific test file (usage: make test-file FILE=tests/test_x.py)
-	uv run pytest $(FILE)
-
-test-one: ## Run specific test (usage: make test-one TEST=tests/test_x.py::test_func)
-	uv run pytest $(TEST)
-
-pytest: ## Run tests with pytest
-	@echo "👷‍♂️ $(BLUE)running tests$(NC)"
-	@uv run --extra all pytest -v
-
-coverage: ## Run tests with coverage reporting
-	@echo "👷‍♂️ $(BLUE)running tests with coverage$(NC)"
-	@uv run --extra all pytest --cov=src --cov-report=term --cov-report=html --cov-report=lcov
 
 ## Code Quality
 
-typecheck: ## Run mypy type checking
-	@echo "👷‍♂️ $(BLUE)running type checking$(NC)"
-	@uv run mypy --strict src/oatk
+format: env-dev ## Format code and fix linting issues
+	uv run ruff format src/oatk tests examples
+	uv run ruff check --fix src/oatk tests examples
 
-lint: ## Run ruff linting
-	@echo "👷‍♂️ $(BLUE)running linter$(NC)"
-	@uv run --extra dev ruff check --target-version=$(RUFF_PYTHON_VERSION) src/oatk tests examples
+lint: env-dev ## Check code for linting issues
+	uv run ruff check src/oatk tests examples
 
-format: ## Format code with ruff
-	@echo "👷‍♂️ $(BLUE)formatting$(NC)"
-	@uv run ruff format src/oatk tests examples
+typecheck: env-dev ## Run type checking
+	uv run mypy --strict src/oatk
 
-format-check: ## Check formatting without making changes
-	@echo "👷‍♂️ $(BLUE)checking formatting$(NC)"
-	@uv run ruff format --check src/oatk tests examples
-
-check: typecheck lint format-check ## Run all checks (typecheck, lint, format-check)
-
-## Build & Publish
-
-build: dist ## Build package distributions
-
-publish: dist ## Build and publish to PyPI (requires credentials)
-	@echo "👷‍♂️ $(BLUE)publishing to PyPI$(NC)"
-	uv run twine upload dist/*
-
-publish-test: dist ## Build and publish to TestPyPI (requires credentials)
-	@echo "👷‍♂️ $(BLUE)publishing to TestPyPI$(NC)"
-	uv run twine upload --repository testpypi dist/*
-
-dist: dist-clean ## Build distributions
-	@echo "👷‍♂️ $(BLUE)building distribution$(NC)"
-	uv build
-
-dist-clean: ## Clean build artifacts
-	@rm -rf dist build *.egg-info
-
-## Cleanup
-
-clean: ## Remove build artifacts and backup files
-	@find . -type f -name "*.backup" -delete
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-
-clean-all: clean dist-clean clean-venv ## Deep clean (removes venv, build artifacts, caches)
+check: format lint typecheck test ## Run all quality checks
 
 ## Examples
 
-quart-example: ## Run Quart OAuth example with automated curl tests
+run: env-run ## Run the legacy Flask Google example
+	uv run gunicorn -k eventlet examples.google.app:server
+
+quart-example: env-dev ## Run Quart OAuth example with automated tests
 	./examples/quart_test.sh
 
-quart-server: ## Start Quart OAuth example server for manual testing
-	@echo "👷‍♂️ $(BLUE)starting Quart server (for manual testing)$(NC)"
-	@echo "Server will be available at http://localhost:8000"
-	@echo "Press Ctrl+C to stop"
+quart-server: env-dev ## Start Quart OAuth example server for manual testing
 	uv run uvicorn examples.quart_example:app --reload --port 8000
 
-fastapi-example: ## Run FastAPI OAuth example automated test suite
-	@echo "👷‍♂️ $(BLUE)running FastAPI example tests$(NC)"
-	@echo "FastAPI example does not yet have automated tests"
-	@echo "Starting server for manual testing instead..."
-	@echo "Server will be available at http://localhost:8001"
-	@echo "Press Ctrl+C to stop"
+fastapi-example: env-dev ## Start FastAPI OAuth example server
 	uv run uvicorn examples.fastapi_example:app --reload --port 8001
 
-fastapi-server: ## Start FastAPI OAuth example server for manual testing
-	@echo "👷‍♂️ $(BLUE)starting FastAPI server (for manual testing)$(NC)"
-	@echo "Server will be available at http://localhost:8001"
-	@echo "Press Ctrl+C to stop"
+fastapi-server: env-dev ## Start FastAPI OAuth example server for manual testing
 	uv run uvicorn examples.fastapi_example:app --reload --port 8001
+
+## Documentation
+
+docs: env-dev ## Build HTML documentation
+	cd docs && uv run sphinx-build -M html . _build
+
+docs-view: docs ## Build and open documentation
+	open docs/_build/html/index.html
+
+## Build & Publish
+
+build: ## Build distribution packages
+	uv build
+
+pre-publish: check ## Pre-publication checks (run before publishing)
+	@echo "Checking for relative image paths in README..."
+	@grep -n '!\[.*](media/' README.md && (echo "ERROR: Relative image paths found - use raw GitHub URLs for PyPI"; exit 1) || echo "OK: No relative image paths"
+	@echo "Checking version sync..."
+	@VERSION_PY=$$(grep '^version =' pyproject.toml | cut -d'"' -f2); \
+	VERSION_INIT=$$(grep '^__version__ = ' src/oatk/__init__.py | cut -d'"' -f2); \
+	if [ "$$VERSION_PY" != "$$VERSION_INIT" ]; then \
+		echo "ERROR: Version mismatch - pyproject.toml ($$VERSION_PY) vs __init__.py ($$VERSION_INIT)"; \
+		exit 1; \
+	fi; \
+	echo "OK: Versions match ($$VERSION_PY)"
+	@echo "Pre-publication checks passed"
+
+publish: clean build ## Publish to PyPI (runs pre-publish checks)
+	@$(MAKE) pre-publish
+	uv run twine upload dist/*
+
+publish-test: build ## Publish to TestPyPI
+	uv run twine upload --repository testpypi dist/*
+
+## Cleanup
+
+clean: ## Remove build artifacts
+	rm -rf dist/ build/ *.egg-info .pytest_cache .coverage .mypy_cache .ruff_cache
+	rm -rf docs/_build
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+clean-all: clean ## Remove virtualenv and lock file
+	rm -rf .venv uv.lock
 
 ## Help
 
 help: ## Show this help message
 	@echo "Usage: make [target]"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "Targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | grep -v "install-pythons\|sync" | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-# include optional a personal/local touch
+# Project-specific targets (review and integrate)
+# - quart-example, quart-server: OAuth example with Quart
+# - fastapi-example, fastapi-server: OAuth example with FastAPI
 
 -include Makefile.mak
